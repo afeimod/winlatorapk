@@ -9,7 +9,7 @@ import androidx.preference.PreferenceManager;
 import com.winlator.MainActivity;
 import com.winlator.R;
 import com.winlator.core.AppUtils;
-import com.winlator.core.TarZstdUtils;
+import com.winlator.core.TarCompressorUtils;
 import com.winlator.xenvironment.ImageFs;
 
 import java.io.File;
@@ -43,7 +43,7 @@ public class OBBFinder {
             int id = activity.getResources().getIdentifier("installing_obb_image","string",activity.getPackageName());
             activity.preloaderDialog.showOnUiThread(id);
             new Thread(()->{
-                TarZstdUtils.extract(activity, assetFileName, ImageFs.find(activity).getRootDir());
+                TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, activity, assetFileName, ImageFs.find(activity).getRootDir());
                 afterExtractFinished(activity);
                 activity.preloaderDialog.closeOnUiThread();
             },"解压数据包（从assets中）").start();
