@@ -30,7 +30,6 @@ public class TouchpadView extends View {
     private static final byte MAX_TAP_TRAVEL_DISTANCE = 10;
     private static final String TAG = "TouchpadView";
     public static boolean isRelativeOnStart=true;
-    public static Matrix matrixA2X = new Matrix();
 
     private final Finger[] fingers = new Finger[MAX_FINGERS];
     private byte numFingers = 0;
@@ -43,9 +42,10 @@ public class TouchpadView extends View {
     private boolean scrolling = false;
     private final XServer xServer;
     private Runnable fourFingersTapCallback;
+    /** 这个就相当于那个与aToXMatrix了吧？ */
     private final float[] xform = XForm.getInstance();
+    private boolean isFullScreen;
 
-    private boolean currentIsFullScreen; //存一份备份
 
     public TouchpadView(Context context, XServer xServer) {
         super(context);
@@ -56,14 +56,11 @@ public class TouchpadView extends View {
         setFocusableInTouchMode(false);
         updateXform(AppUtils.getScreenWidth(), AppUtils.getScreenHeight(), xServer.screenInfo.width, xServer.screenInfo.height);
 
-
-
-        currentIsFullScreen = xServer.getRenderer().isFullscreen();
-
+        isFullScreen = xServer.getRenderer().isFullscreen();
         //根据安卓屏幕分辨率和容器分辨率设置一个矩阵。照着exa那样就行了
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        context.getSystemService(WindowManager.class).getDefaultDisplay().getMetrics(displayMetrics);
-        matrixA2X = refreshMatrix(xServer.screenInfo.width, xServer.screenInfo.height, displayMetrics.widthPixels, displayMetrics.heightPixels);
+//        DisplayMetrics displayMetrics = new DisplayMetrics();
+//        context.getSystemService(WindowManager.class).getDefaultDisplay().getMetrics(displayMetrics);
+//        matrixA2X = refreshMatrix(xServer.screenInfo.width, xServer.screenInfo.height, displayMetrics.widthPixels, displayMetrics.heightPixels);
 
     }
 
@@ -77,7 +74,7 @@ public class TouchpadView extends View {
         float viewTranX=0,viewTranY=0,
                 x11TranX = 0, x11TranY = 0;
 
-        if(!currentIsFullScreen){
+        if(!isFullScreen){
             //等比全屏时，最终值选择scaleXY中较小的一个
             a_div_x_scaleW = Math.min(a_div_x_scaleW,a_div_x_scaleH);
             a_div_x_scaleH = a_div_x_scaleW;
@@ -89,9 +86,6 @@ public class TouchpadView extends View {
             //等比全屏时，比如左右黑边，则安卓单位的view需要往右移动一段距离
             viewTranX = (wA-wX*a_div_x_scaleW)/2;
             viewTranY = (hA-hX*a_div_x_scaleH)/2;
-
-
-
         }
 
         Matrix newMatrix = new Matrix();
@@ -104,120 +98,79 @@ public class TouchpadView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         updateXform(w, h, xServer.screenInfo.width, xServer.screenInfo.height);
-        //解决旋转屏幕后矩阵不对的问题
-        matrixA2X = refreshMatrix(xServer.screenInfo.width, xServer.screenInfo.height, w, h);
     }
 
     private void updateXform(int outerWidth, int outerHeight, int innerWidth, int innerHeight) {
-        Viewport viewport = new Viewport();
-        viewport.update(outerWidth, outerHeight, innerWidth, innerHeight);
+        //它这个Viewport忽略了拉伸全屏的情况（全屏时scaleX和Y是不同的，不能用同一个）
+        float a_div_x_scaleW = 1f*outerWidth/innerWidth, a_div_x_scaleH = 1f*outerHeight/innerHeight;
+        float viewTranX=0, viewTranY=0;
 
-        float invAspect = 1.0f / viewport.aspect;
-        if (!xServer.getRenderer().isFullscreen()) {
-            XForm.makeTranslation(xform, -viewport.x, -viewport.y);
-            XForm.scale(xform, invAspect, invAspect);
+        if(!isFullScreen){
+            //等比全屏时，最终值选择scaleXY中较小的一个
+            a_div_x_scaleW = Math.min(a_div_x_scaleW,a_div_x_scaleH);
+            a_div_x_scaleH = a_div_x_scaleW;
+
+            //等比全屏时，比如左右黑边，则安卓单位的view需要往右移动一段距离
+            viewTranX = (outerWidth-innerWidth*a_div_x_scaleW)/2;
+            viewTranY = (outerHeight-innerHeight*a_div_x_scaleH)/2;
         }
-        else XForm.makeScale(xform, invAspect, invAspect);
+
+        if (!xServer.getRenderer().isFullscreen()) {
+            XForm.makeTranslation(xform, -viewTranX, -viewTranY);
+            XForm.scale(xform, 1f/a_div_x_scaleW, 1f/a_div_x_scaleH);
+        }
+        else XForm.makeScale(xform, 1f/a_div_x_scaleW, 1f/a_div_x_scaleH);
     }
 
-    private static class Finger {
-        private float x;
-        private float y;
-        private float startX;
-        private float startY;
-        private float lastX;
-        private float lastY;
+    private class Finger {
+        //x, startX, lastX大小现在都是x单位的.
+        // 从float改成int，这样可以保证移动位置的过程，不会出现误差：
+        // 如果两次float有变化，但整数位大小相同，那么本次不移动。
+        // 直到两次float整数位不同了，才移动一次。然后再直到下次整数位不同再移动
+        // 不管移动多远，误差只有最后那次移动忽略掉的小数部分。
+        private int x;
+        private int y;
+        private int startX;
+        private int startY;
+        private int lastX;
+        private int lastY;
         private final long touchTime;
-        private int pointerStartX, pointerStartY; //记录光标起始位置
-        private final int startXInXUnit, startYInXUnit; //单独拿出来一个记录xserver单位的起始坐标，原来安卓单位的在其他地方有用到不能变。至于实时坐标只记录安卓单位的，要用xserver单位的现算就行了。
 
-
-        public Finger(float ax, float ay, int psx, int psy) {
-//            float[] transformedPoint = XForm.transformPoint(xform, x, y);
-//            this.x = this.startX = this.lastX = transformedPoint[0];
-//            this.y = this.startY = this.lastY = transformedPoint[1];
-//            touchTime = System.currentTimeMillis();
-            //记录光标起始位置
-            pointerStartX = psx;
-            pointerStartY = psy;
-
-            this.lastX = ax;
-            this.startX = ax;
-            this.x = ax;
-            this.y = ay;
-            this.lastY = ay;
-            this.startY = ay;
-
-            //转换为xserver单位
-            float[] mapPoints = mapPoints(matrixA2X, ax, ay);
-            startXInXUnit = (int) mapPoints[0];
-            startYInXUnit = (int) mapPoints[1];
-
+        public Finger(float x, float y) {
+            float[] transformedPoint = XForm.transformPoint(xform, x, y);
+            this.x = this.startX = this.lastX = (int) transformedPoint[0];
+            this.y = this.startY = this.lastY = (int) transformedPoint[1];
             touchTime = System.currentTimeMillis();
         }
 
         public void update(float x, float y) {
-//            lastX = this.x;
-//            lastY = this.y;
-//            float[] transformedPoint = XForm.transformPoint(xform, x, y);
-//            this.x = transformedPoint[0];
-//            this.y = transformedPoint[1];
-            //为啥要用dp？改回px
             lastX = this.x;
             lastY = this.y;
-            this.x = x;
-            this.y = y;
+            float[] transformedPoint = XForm.transformPoint(xform, x, y);
+            this.x = (int) transformedPoint[0];
+            this.y = (int) transformedPoint[1];
         }
 
-        private int[] deltaXY(float sensitivity){
-            float[] xyInXUnit = mapPoints(TouchpadView.matrixA2X,x,y);
-            float[] lastXYInXUnit = mapPoints(TouchpadView.matrixA2X,lastX,lastY);
-
-            float dx = (xyInXUnit[0] - lastXYInXUnit[0])  * sensitivity;
-            float dy = (xyInXUnit[1] - lastXYInXUnit[1])  * sensitivity;
-            return new int[]{(int) dx, (int) dy};
-        }
-
-        /**
-         * @deprecated 请使用deltaXY
-         */
-        @Deprecated
         private int deltaX(float sensitivity) {
             float dx = (x - lastX) * sensitivity;
             return (int)(x <= lastX ? Math.floor(dx) : Math.ceil(dx));
         }
 
-        @Deprecated
         private int deltaY(float sensitivity) {
             float dy = (y - lastY) * sensitivity;
             return (int)(y <= lastY ? Math.floor(dy) : Math.ceil(dy));
-        }
-
-        //获取光标应该在的最新位置
-        private int[] nowPointer(float sensitivity) {
-            float[] nowXYInXUnit = mapPoints(matrixA2X, x, y);
-            return new int[]{(int) (pointerStartX + (nowXYInXUnit[0] - startXInXUnit) * sensitivity),
-                    (int) (pointerStartY + (nowXYInXUnit[1] - startYInXUnit) * sensitivity)}
-                    ;
-        }
-        /**
-         * 用于拖拽时，拖拽手指松开后，修正固定手指记录的指针位置
-         */
-        public void changePointerStartPos(int psx, int psy){
-            pointerStartX = psx;
-            pointerStartY = psy;
         }
 
         /**
          * 用于二指右键，只松开了一根手指后，修改第一根手指的startX，以免第一根手指松开时触发左键点击事件
          */
         public void changeStartPos(float sx,float sy){
-            startX  =sx;
-            startY = sy;
+            startX  = (int) sx;
+            startY = (int) sy;
         }
 
         private boolean isTap() {
-            return (System.currentTimeMillis() - touchTime) < 200 && travelDistance() < MAX_TAP_TRAVEL_DISTANCE;
+            return (System.currentTimeMillis() - touchTime) < 300 && travelDistance() < MAX_TAP_TRAVEL_DISTANCE;
         }
 
         private float travelDistance() {
@@ -225,11 +178,6 @@ public class TouchpadView extends View {
         }
     }
 
-    public static float[] mapPoints(Matrix matrix, float ax, float ay) {
-        float[] testFloats = new float[]{ax,ay};
-        TouchpadView.matrixA2X.mapPoints(testFloats);
-        return testFloats;
-    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -238,20 +186,20 @@ public class TouchpadView extends View {
         int actionMasked = event.getActionMasked();
         if (pointerId >= MAX_FINGERS) return true;
 
-        //时刻刷新检测拉伸全屏状态是否有变化吧
-        if(xServer.getRenderer().isFullscreen() != currentIsFullScreen){
-            currentIsFullScreen = !currentIsFullScreen;
-            matrixA2X = refreshMatrix(xServer.screenInfo.width, xServer.screenInfo.height, getWidth(), getHeight());
-        }
-
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
+                //时刻刷新检测拉伸全屏状态是否有变化吧
+                if(xServer.getRenderer().isFullscreen() != isFullScreen){
+                    isFullScreen = !isFullScreen;
+                    updateXform(getWidth(), getHeight(), xServer.screenInfo.width, xServer.screenInfo.height);
+                }
+
                 if (event.isFromSource(InputDevice.SOURCE_MOUSE)) return true;
                 scrollAccumY = 0;
                 scrolling = false;
                 handleFingerDown(event.getX(actionIndex), event.getY(actionIndex));
-                fingers[pointerId] = new Finger(event.getX(actionIndex), event.getY(actionIndex), xServer.pointer.getX(), xServer.pointer.getY());
+                fingers[pointerId] = new Finger(event.getX(actionIndex), event.getY(actionIndex));
                 numFingers++;
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -311,11 +259,10 @@ public class TouchpadView extends View {
         if(numFingers>0)
             return;
 
-        float max_tap_dist_in_x_unit = 20f;//Finger.mapPoints(matrixA2X, MAX_TAP_TRAVEL_DISTANCE, 0)[0];
         float[] pointerPos = new float[]{xServer.pointer.getX(), xServer.pointer.getY()};
-        float[] pressPos = mapPoints(matrixA2X, pressX, pressY);
+        float[] pressPos = XForm.transformPoint(xform, pressX, pressY); //mapPoints(matrixA2X, pressX, pressY);
         //手指位置与当前指针位置距离超过了点击距离，并且是绝对点击，则将指针移动到手指位置
-        if (Math.pow(pressPos[0] - pointerPos[0], 2) + Math.pow(pressPos[1] - pointerPos[1], 2) > Math.pow(max_tap_dist_in_x_unit, 2)) {
+        if (Math.hypot(pressPos[0] - pointerPos[0], pressPos[1] - pointerPos[1]) > MAX_TAP_TRAVEL_DISTANCE) {
             Log.d(TAG, "handleFingerDown: 只有一根手指，此时应该移动到手指位置,坐标变换前="+pressX+", "+pressY+", 坐标变换后="+ Arrays.toString(pressPos));
             xServer.injectPointerMove((int) pressPos[0], (int) pressPos[1]);
         }
@@ -337,10 +284,6 @@ public class TouchpadView extends View {
                     //屏蔽第一根手指的左键事件
                     finger2.changeStartPos(-100,-100);
                 }
-                //如果没松开的那根手指 是鼠标左键的手指
-                else if(finger2!=null && fingerPointerButtonLeft == finger2){
-                    finger2.changePointerStartPos(xServer.pointer.getX(),xServer.pointer.getY());
-                }
                 break;
             case 4:
                 if (fourFingersTapCallback != null) {
@@ -356,17 +299,16 @@ public class TouchpadView extends View {
         releasePointerButtonRight(finger1);
     }
 
-    private void handleFingerMove(Finger finger) {
+    private void handleFingerMove(Finger finger1) {
         boolean skipPointerMove = false;
 
-        Finger anoFinger = numFingers == 2 ? findSecondFinger(finger) : null;
-        if (anoFinger != null) {
-            float lastDistance = (float)Math.hypot(finger.lastX - anoFinger.lastX, finger.lastY - anoFinger.lastY);
-            float currDistance = (float)Math.hypot(finger.x - anoFinger.x, finger.y - anoFinger.y);
+        Finger finger2 = numFingers == 2 ? findSecondFinger(finger1) : null;
+        if (finger2 != null) {
+            float currDistance = (float)Math.hypot(finger1.x - finger2.x, finger1.y - finger2.y);
 
             //如果两个手指挨的较近，则滚动
             if (currDistance < MAX_TWO_FINGERS_SCROLL_DISTANCE) {
-                scrollAccumY += ((finger.y + anoFinger.y) * 0.5f) - (finger.lastY + anoFinger.lastY) * 0.5f;
+                scrollAccumY += ((finger1.y + finger2.y) * 0.5f) - (finger1.lastY + finger2.lastY) * 0.5f;
 
                 if (scrollAccumY < -100) {
                     xServer.injectPointerButtonPress(Pointer.Button.BUTTON_SCROLL_DOWN);
@@ -388,36 +330,34 @@ public class TouchpadView extends View {
             //不对，ano应该是移动的手指，finger是固定的手指
             else if (currDistance >= MAX_TWO_FINGERS_SCROLL_DISTANCE
                     && !xServer.pointer.isButtonPressed(Pointer.Button.BUTTON_LEFT) &&
-                     anoFinger.travelDistance() < MAX_TAP_TRAVEL_DISTANCE) {
-                pressPointerButtonLeft(finger);
+                     finger2.travelDistance() < MAX_TAP_TRAVEL_DISTANCE) {
+                pressPointerButtonLeft(finger1);
                 skipPointerMove = true;
             }
         }
 
         if (!scrolling && numFingers <= 2 && !skipPointerMove) {
-            float distance = (float)Math.hypot(finger.x - finger.lastX, finger.y - finger.lastY);
+            float distance = (float)Math.hypot(finger1.x - finger1.lastX, finger1.y - finger1.lastY);
             float sensitivity = this.sensitivity * Math.min(distance, 1.0f);
-//            int dx = finger.deltaX(sensitivity);
-//            int dy = finger.deltaY(sensitivity);
-            int[] dxy = finger.deltaXY(sensitivity);
-            int dx = dxy[0];// finger.deltaX();
-            int dy = dxy[1];//finger.deltaY();
+            int dx = finger1.deltaX(sensitivity);
+            int dy = finger1.deltaY(sensitivity);
 
             if (xServer.cursorLocker.getState() == CursorLocker.State.LOCKED) {
                 WinHandler winHandler = xServer.getWinHandler();
                 winHandler.mouseEvent(MouseEventFlags.MOVE, dx, dy, 0);
-                Log.d(TAG, "handleFingerMove: dx,dy"+ Arrays.toString(dxy));
+//                Log.d(TAG, "handleFingerMove: dx,dy"+ Arrays.toString(dxy));
             }
-            else {
-                if(isRelativeOnStart){
-                    xServer.injectPointerMoveDelta(dx, dy);
-                    Log.d(TAG, "handleFingerMove: dx,dy"+ Arrays.toString(dxy));
-                }else{
-                    //改为设置绝对位置
-                    int[] nowPointer = finger.nowPointer(sensitivity);
-                    xServer.injectPointerMove(nowPointer[0], nowPointer[1]);
-                }
-            }
+            else xServer.injectPointerMoveDelta(dx, dy);
+//            else {
+//                if(isRelativeOnStart){
+//                    xServer.injectPointerMoveDelta(dx, dy);
+////                    Log.d(TAG, "handleFingerMove: dx,dy"+ Arrays.toString(dxy));
+//                }else{
+//                    //改为设置绝对位置
+//                    int[] nowPointer = finger1.nowPointer(sensitivity);
+//                    xServer.injectPointerMove(nowPointer[0], nowPointer[1]);
+//                }
+//            }
         }
     }
 

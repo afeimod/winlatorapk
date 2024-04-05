@@ -17,7 +17,10 @@ import com.google.android.material.navigation.NavigationView;
 import com.winlator.XServerDisplayActivity;
 import com.winlator.contentdialog.ContentDialog;
 import com.winlator.core.EnvVars;
+import com.winlator.renderer.GLRenderer;
 import com.winlator.widget.TouchpadView;
+
+import java.lang.reflect.Field;
 
 public class XserverNavMenuControl {
     private static final String TAG = "XserverNavMenuControl";
@@ -94,13 +97,23 @@ public class XserverNavMenuControl {
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
-    public static void setIsOrieLandFromPref(Context a, boolean isLandSc, boolean updatePref) {
+    public static void setIsOrieLandFromPref(XServerDisplayActivity a, boolean isLandSc, boolean updatePref) {
         if (updatePref)
             QH.getPreference(a).edit().putBoolean(PREF_KEY_XSA_ORIENT_LAND, isLandSc).apply();//更新存储设置
-        if (a instanceof Activity)
-            ((Activity) a).setRequestedOrientation(isLandSc
-                    ? SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                    : SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        ((Activity) a).setRequestedOrientation(isLandSc
+                ? SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                : SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+        //手动刷新viewport (延迟切换拉伸全屏两次吧，不知道为啥直接反射 设置GLRenderer.viewportNeedsUpdate 没反应）(啊忘了是private要设置accessible了。。）
+        try {
+            Field field = GLRenderer.class.getDeclaredField("viewportNeedsUpdate");
+            field.setAccessible(true);
+            field.setBoolean(a.getXServer().getRenderer(), true);
+            field.setAccessible(false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        a.getXServer().getRenderer().xServerView.postDelayed(()-> a.getXServer().getRenderer().toggleFullscreen(),500);
+//        a.getXServer().getRenderer().xServerView.postDelayed(()-> a.getXServer().getRenderer().toggleFullscreen(),800);
     }
 
     public static boolean getIsGameStyleCursorFromPref(Context a) {
@@ -144,7 +157,7 @@ public class XserverNavMenuControl {
             checkGameStyleCursor.setChecked(getIsGameStyleCursorFromPref(a));
             checkGameStyleCursor.setOnCheckedChangeListener((buttonView, isChecked) -> setIsGameStyleCursor(a, isChecked, true));
             LinearLayout linearStyle = QH.wrapHelpBtnWithLinear(a, checkGameStyleCursor, QH.string.游戏样式光标选项说明);
-            linearRoot.addView(linearStyle);
+//            linearRoot.addView(linearStyle);
 
             try {
                 boolean testHasFeature = TouchpadView.isRelativeOnStart;

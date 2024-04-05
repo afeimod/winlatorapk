@@ -31,6 +31,7 @@ import androidx.fragment.app.Fragment;
 import com.winlator.MainActivity;
 import com.winlator.core.Callback;
 import com.winlator.core.OnExtractFileListener;
+import com.winlator.core.TarCompressorUtils;
 import com.winlator.xenvironment.ImageFs;
 
 import java.io.DataInputStream;
@@ -251,13 +252,9 @@ public class OBBSelectFragment extends Fragment {
 
     }
 
-    /**
-     * @deprecated TarZstdUtils.extract 这个函数没了，现在也不需要手动选了
-     */
-    @Deprecated
     private void extractFromUri(Uri uri, Runnable callback) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            boolean extractResult = false; //TarZstdUtils.extract(requireActivity(),uri,rootDir);
+            boolean extractResult = TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, requireActivity(),uri,rootDir);
 //            try {
 //                extractResult = (Boolean) QH.reflectInvokeMethod(
 //                        TarZstdUtils.class,
