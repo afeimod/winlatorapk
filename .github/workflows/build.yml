@@ -34,22 +34,23 @@ jobs:
 
           restore-keys: |
             ${{ runner.os }}-gradle-
-    - name: 5.5 下载数据包
+    
+    # 先删除旧文件。然后下载完整文件
+    - name: 6 下载数据包
       run: |
+        rm -rf app/src/main/assets/imagefs.txz 
         wget -P app/src/main/assets \
         https://github.com/ewt45/winlator-fork/releases/download/0.0.0.store/imagefs.txz
 
-    - name: 6. 构建
-      run: |
-        wget -P app/src/main/assets \
-        https://github.com/ewt45/winlator-fork/releases/download/0.0.0.store/imagefs.txz
-        chmod +x ./gradlew && ./gradlew assembleDebug
+    - name: 7. 构建
+      run: chmod +x ./gradlew && ./gradlew assembleDebug
     
-    - name: 7. 上传apk
+    - name: 8. 上传apk到action
       uses: actions/upload-artifact@v4
       with:
         name: winlator-arm64-v8-debug
         path: ./app/build/outputs/apk/debug/app-debug.apk
+    
 
     # - name: Update Nightly Release
     #   uses: andelf/nightly-release@main
