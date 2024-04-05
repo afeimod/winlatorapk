@@ -2,12 +2,12 @@ name: 构建apk
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - master
-  # pull_request:
-  #   branches:
-  #     - master
+  push:
+    branches:
+      - extra2
+  pull_request:
+    branches:
+      - extra2
 
 jobs:
   build:
