@@ -2,12 +2,6 @@ name: 构建apk
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - extra2
-  pull_request:
-    branches:
-      - extra2
 
 jobs:
   build:
@@ -16,7 +10,7 @@ jobs:
     steps:
     - name: 1 安装依赖
       run: |
-        sudo apt update && sudo apt install -y libarchive-tools
+        sudo apt update && sudo apt install -y libarchive-tools wget
     - name: 2 克隆仓库
       uses: actions/checkout@v4
       with:
@@ -40,9 +34,16 @@ jobs:
 
           restore-keys: |
             ${{ runner.os }}-gradle-
+    - name: 5.5 下载数据包
+      run: |
+        wget -P app/src/main/assets \
+        https://github.com/ewt45/winlator-fork/releases/download/0.0.0.store/imagefs.txz
 
     - name: 6. 构建
-      run: chmod +x ./gradlew && ./gradlew assembleDebug
+      run: |
+        wget -P app/src/main/assets \
+        https://github.com/ewt45/winlator-fork/releases/download/0.0.0.store/imagefs.txz
+        chmod +x ./gradlew && ./gradlew assembleDebug
     
     - name: 7. 上传apk
       uses: actions/upload-artifact@v4
