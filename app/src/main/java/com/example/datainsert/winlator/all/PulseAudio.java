@@ -15,7 +15,7 @@ import androidx.preference.PreferenceManager;
 
 import com.winlator.XServerDisplayActivity;
 import com.winlator.core.FileUtils;
-import com.winlator.core.TarZstdUtils;
+import com.winlator.core.TarCompressorUtils;
 import com.winlator.contentdialog.ContentDialog;
 import com.winlator.xenvironment.ImageFs;
 
@@ -149,7 +149,7 @@ public class PulseAudio {
         new Thread(() -> {
             if (!new File(paWorkDir, "pulseaudio").exists()) {
                 boolean b = paWorkDir.mkdirs();
-                TarZstdUtils.extract(a, "pulseaudio-xsdl.tar.zst", ImageFs.find(a).getRootDir());//解压必要文件
+                TarCompressorUtils.extract(TarCompressorUtils.Type.ZSTD, a, "pulseaudio-xsdl.tar.zst", ImageFs.find(a).getRootDir());//解压必要文件
             }
 
             if (!new File(paWorkDir, "pulseaudio").exists()) {
