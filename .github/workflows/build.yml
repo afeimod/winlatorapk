@@ -42,7 +42,7 @@ jobs:
             ${{ runner.os }}-gradle-
 
     - name: 6. 构建
-      run: ./gradlew assembleDebug
+      run: chmod +x ./gradlew && ./gradlew assembleDebug
     
     - name: 7. 上传apk
       uses: actions/upload-artifact@v4
