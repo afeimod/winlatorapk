@@ -180,4 +180,60 @@
     <string name="wine_configuration">wine配置</string>
     <string name="wine_version">Wine版本</string>
     <string name="xserver">XServer</string>
+    <string name="dxwrapper_help_content"><![CDATA[
+        <i><b>WineD3D</b></i> 将 DirectX1-11 调用转换为 OpenGL 调用。<br /><br />
+        <i><b>DXVK</b></i> 将 Direct3D 9-11 调用转换为 Vulkan 调用。<br /><br />
+        <i><b>D8VK</b></i> 将Direct3D 8 调用转换为 Vulkan 调用。<br /><br />
+        <i><b>CNC DDraw</b></i> 是一种 DirectDraw 的实现，对老游戏的兼容性更好。
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_safeflags"><![CDATA[
+        处理 CALL/RET 操作码的标志位<br /><br />
+        <b>0</b> : 认为 CALL/RET 永远不需要标志位。（更快，不稳定）<br />
+        <b>1</b> : 绝大多数的 RET 需要标志位，绝大多数的 CALL 不需要。<br />
+        <b>2</b> : 全部的 CALL/RET 都需要标志位。（更慢）
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_fastnan"><![CDATA[
+        启用/禁用 生成 -NAN。<br /><br />
+        <b>0</b> : 像在x86上一样，生成 -NAN。<br />
+        <b>1</b> : 不对 NAN 做任何特殊处理，尽可能快速运行。（默认，更快）<br />
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_fastround"><![CDATA[
+        启用/禁用 生成精确的x86四舍五入。<br /><br />
+        <b>0</b> : 像在x86上一样，生成 float/double -> int 的四舍五入。<br />
+        <b>1</b> : 不做任何特殊的边界值四舍五入，尽可能快速运行。（无 INF/NAN/Overflow -> MIN_INT 的转换）（默认，更快）<br />
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_x87double"><![CDATA[
+        为x87模拟强制使用Double。<br /><br />
+        <b>0</b> : 为x87模拟尽可能使用float。（默认，更快）<br />
+        <b>1</b> : 为x87模拟仅使用Double。（更慢，某些游戏如孤岛危机可能需要）<br />
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_bigblock"><![CDATA[
+        启用/禁用 Dynarec 构建块大小k<br /><br />
+        <b>0</b> : 不要构建尽可能大的 Dynarec块。（适用于使用很多线程或JIT的程序，例如 C#/Unity）（当libmonobdwgc-2.0加载后为默认项）<br />
+        <b>1</b> : 构建尽可能大的 Dynarec块。（默认）<br />
+        <b>2</b> : 构建更大的 Dynarec块。（若块在elf内存中，即使块重叠也不停止）<br />
+        <b>3</b> : 构建更大的 Dynarec块。（对于全部类型的内存，即使快重叠也不停止）
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_strongmem"><![CDATA[
+        启用/禁用 模拟强内存模型。<br /><br />
+        <b>0</b> : 不作任何特殊处理。（默认） Don\'t try anything special<br />
+        <b>1</b> : 当写入内存时（如某些MOV操作符），启用一些内存屏障，以模拟强内存模型，同时尽量减小性能影响。（当libmonobdwgc-2.0加载后为默认项）<br />
+        <b>2</b> : 当写入内存时（如某些MOV操作符），启用一些内存屏障，以模拟强内存模型。<br />
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_forward"><![CDATA[
+        定义 Dynarec 构建块时，允许向前移动的最大值。<br /><br />
+        <b>0</b> : 无向前移动值。在当前块结束时，不要继续处理，即使之前有向前的跳转。<br />
+        <b>xxx</b> : 在当构建当前块结束时，距离下一个向前跳转，最多允许 xxx 字节的距离。（默认：128）<br />
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_callret"><![CDATA[
+        优化 CALL/RET 操作码。（不兼容jit/dynarec/smc）<br /><br />
+        <b>0</b> : 不优化 CALL/RET，为两者使用跳转表。（默认）无向前移动值。在当前块结束时，不要继续处理，即使之前有向前的跳转。<br />
+        <b>1</b> : 尽量优化 CALL/RET，尽可能跳过使用跳转表。（可能不兼容 JIT/Dynarec)<br />
+    ]]></string>
+    <string name="box86_64_env_var_help__dynarec_wait"><![CDATA[
+        FillBlock<br /><br />
+        <b>0</b> : Dynarec 不会等待 FillBlock 准备好，而是使用 Interpreter。（可能对JIT或大量使用多线程的程序有提速）<br />
+        <b>1</b> : Dynarec 会等待 FillBlock 准备好。（默认）<br />
+    ]]></string>
+
 </resources>
