@@ -64,36 +64,6 @@ public class TouchpadView extends View {
 
     }
 
-    /**
-     * 生成安卓单位的坐标到xserver单位的坐标的矩阵。参数：xserver的宽高，安卓视图的宽高
-     */
-    private Matrix refreshMatrix(int wX, int hX, int wA, int hA) {
-
-        float a_div_x_scaleW = 1f*wA/wX, a_div_x_scaleH = 1f*hA/hX,
-                whRatioX = 1f*wX/hX, whRatioA = 1f*wA/hA;
-        float viewTranX=0,viewTranY=0,
-                x11TranX = 0, x11TranY = 0;
-
-        if(!isFullScreen){
-            //等比全屏时，最终值选择scaleXY中较小的一个
-            a_div_x_scaleW = Math.min(a_div_x_scaleW,a_div_x_scaleH);
-            a_div_x_scaleH = a_div_x_scaleW;
-
-            //等比全屏时，比如左右黑屏，需要先将xserver移到左上角原点，即向左移动一段距离 (要先计算出scale才行）
-            x11TranX = (wA/a_div_x_scaleW - wX)/2;
-            x11TranY = (hA/a_div_x_scaleH - hX)/2;
-
-            //等比全屏时，比如左右黑边，则安卓单位的view需要往右移动一段距离
-            viewTranX = (wA-wX*a_div_x_scaleW)/2;
-            viewTranY = (hA-hX*a_div_x_scaleH)/2;
-        }
-
-        Matrix newMatrix = new Matrix();
-        newMatrix.postTranslate(-viewTranX,-viewTranY);
-        newMatrix.postScale(1f/a_div_x_scaleW,1f/a_div_x_scaleH);
-        return newMatrix;
-    }
-
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);

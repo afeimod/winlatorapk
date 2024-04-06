@@ -6,8 +6,10 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.SubMenu;
+import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 
@@ -100,20 +102,13 @@ public class XserverNavMenuControl {
     public static void setIsOrieLandFromPref(XServerDisplayActivity a, boolean isLandSc, boolean updatePref) {
         if (updatePref)
             QH.getPreference(a).edit().putBoolean(PREF_KEY_XSA_ORIENT_LAND, isLandSc).apply();//更新存储设置
-        ((Activity) a).setRequestedOrientation(isLandSc
+        a.setRequestedOrientation(isLandSc
                 ? SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 : SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-        //手动刷新viewport (延迟切换拉伸全屏两次吧，不知道为啥直接反射 设置GLRenderer.viewportNeedsUpdate 没反应）(啊忘了是private要设置accessible了。。）
-        try {
-            Field field = GLRenderer.class.getDeclaredField("viewportNeedsUpdate");
-            field.setAccessible(true);
-            field.setBoolean(a.getXServer().getRenderer(), true);
-            field.setAccessible(false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-//        a.getXServer().getRenderer().xServerView.postDelayed(()-> a.getXServer().getRenderer().toggleFullscreen(),500);
-//        a.getXServer().getRenderer().xServerView.postDelayed(()-> a.getXServer().getRenderer().toggleFullscreen(),800);
+        //还是暴力延迟500ms然后切换两次全屏吧。反射修改viewportNeedsUpdate在初次启动时貌似没效果
+        GLRenderer renderer = a.getXServer().getRenderer();
+        renderer.xServerView.postDelayed(renderer::toggleFullscreen,500);
+        renderer.xServerView.postDelayed(renderer::toggleFullscreen,800);
     }
 
     public static boolean getIsGameStyleCursorFromPref(Context a) {
