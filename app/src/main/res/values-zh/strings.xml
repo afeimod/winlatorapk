@@ -235,5 +235,9 @@
         <b>0</b> : Dynarec 不会等待 FillBlock 准备好，而是使用 Interpreter。（可能对JIT或大量使用多线程的程序有提速）<br />
         <b>1</b> : Dynarec 会等待 FillBlock 准备好。（默认）<br />
     ]]></string>
+    <string name="add_to_screen">添加到安卓桌面</string>
+    <string name="screen_shortcut_file_not_exist">快捷方式不存在！</string>
+    <string name="screen_shortcut_add_finish">添加成功。请在安卓桌面长按应用图标查看。</string>
+
 
 </resources>

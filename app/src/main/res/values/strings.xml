@@ -212,4 +212,7 @@
     <string name="magnifier">Magnifier</string>
     <string name="bring_to_front">Bring to Front</string>
     <string name="options">Options</string>
+    <string name="add_to_screen">Add to Android Screen</string>
+    <string name="screen_shortcut_file_not_exist">Shortcut doesn\'t exist!</string>
+    <string name="screen_shortcut_add_finish">Added. Please go to Android screen and long press App icon to check.</string>
 </resources>

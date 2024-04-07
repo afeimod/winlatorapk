@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.datainsert.winlator.all.ExtraFeatures;
 import com.winlator.container.ContainerManager;
 import com.winlator.container.Shortcut;
 import com.winlator.contentdialog.ContentDialog;
@@ -103,7 +104,7 @@ public class ShortcutsFragment extends Fragment {
             holder.title.setText(item.name);
             holder.subtitle.setText(item.container.getName());
             holder.menuButton.setOnClickListener((v) -> showListItemMenu(v, item));
-            holder.innerArea.setOnClickListener((v) -> runFromShortcut(item));
+            holder.innerArea.setOnClickListener((v) -> runFromShortcut(requireActivity(), item));//改为静态后传入activity
         }
 
         @Override
@@ -128,21 +129,24 @@ public class ShortcutsFragment extends Fragment {
                         loadShortcutsList();
                     });
                 }
+                //添加桌面快捷方式
+                else if(itemId == R.id.shortcut_add_to_screen) {
+                    ExtraFeatures.AndroidShortcut.addToScreen(requireActivity(), shortcut);
+                }
                 return true;
             });
             listItemMenu.show();
         }
+    }
 
-        private void runFromShortcut(Shortcut shortcut) {
-            Activity activity = getActivity();
-
-            if (!XrActivity.isSupported()) {
-                Intent intent = new Intent(activity, XServerDisplayActivity.class);
-                intent.putExtra("container_id", shortcut.container.id);
-                intent.putExtra("shortcut_path", shortcut.file.getPath());
-                activity.startActivity(intent);
-            }
-            else XrActivity.openIntent(activity, shortcut.container.id, shortcut.file.getPath());
+    /** 改为静态，放入外层类中。参数添加activity */
+    public static void runFromShortcut(Activity activity, Shortcut shortcut) {
+        if (!XrActivity.isSupported()) {
+            Intent intent = new Intent(activity, XServerDisplayActivity.class);
+            intent.putExtra("container_id", shortcut.container.id);
+            intent.putExtra("shortcut_path", shortcut.file.getPath());
+            activity.startActivity(intent);
         }
+        else XrActivity.openIntent(activity, shortcut.container.id, shortcut.file.getPath());
     }
 }
