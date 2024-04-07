@@ -99,7 +99,7 @@
     <string name="new_environment_variable">新建环境变量</string>
     <string name="new_task">新任务</string>
     <string name="no_control_element_selected">未选择控制元素</string>
-    <string name="no_items_to_display">没有可显示的容器</string>
+    <string name="no_items_to_display">没有可显示的内容</string>
     <string name="no_profile_found">未找到配置</string>
     <string name="no_profile_selected">未选择配置</string>
     <string name="none">无</string>
