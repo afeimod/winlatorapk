@@ -21,6 +21,7 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
     <application
+        android:name="com.example.datainsert.winlator.all.ExtraFeatures$MyApplication"
         android:icon="@mipmap/ic_launcher"
         android:appCategory="game"
         android:isGame="true"
