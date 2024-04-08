@@ -143,7 +143,7 @@
     <string name="show_touchscreen_controls">显示触摸屏控件</string>
     <string name="stability">稳定</string>
     <string name="starting_up">启动中...</string>
-    <string name="stop_services_on_startup">启动时停止服务</string>
+    <string name="stop_services_on_startup">启动时结束services.exe的进程</string>
     <string name="storage_info">存储信息</string>
     <string name="strict_shader_math">Strict Shader Math</string>
     <string name="system">系统</string>
