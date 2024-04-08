@@ -1,6 +1,7 @@
 package com.example.datainsert.winlator.all;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
@@ -29,32 +30,32 @@ class E1_ShortcutOnAndroidScreen {
      * 点击添加到屏幕选项后的操作
      */
     public static void addToScreen(Activity a, Shortcut shortcut){
-        throw new RuntimeException("测试");
-//        //调起初始acitivity的intent，并添加额外参数
-//        Intent intent = new Intent(a, MainActivity.class);
-//        //extra好像要带包名前缀
-//        intent.setAction(Intent.ACTION_MAIN);
-//        intent.putExtra(a.getPackageName() + DESKTOP_FILE_ABSOLUTE_PATH, shortcut.file.getAbsolutePath());
-//        intent.putExtra(a.getPackageName() + CONTAINER_ID, shortcut.container.id);
-//
-//        //构建shortcutinfo，设置intent
-//        ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(a, shortcut.name)
-//                .setShortLabel(shortcut.name)
-//                .setIntent(intent) //设置intent又不一定非要指向目标activity，那难道会加到栈中？如果不指定
-//                .setActivity(new ComponentName(a, MainActivity.class.getName())) //设置目标activity
-//                .build();
-//
-//        //使用旧版shortcutmanager，设置动态快捷方式
-//        ShortcutManager shortcutManager = a.getSystemService(ShortcutManager.class);
-//        List<ShortcutInfo> shortcutInfoList = shortcutManager.getDynamicShortcuts();
-//        shortcutInfoList.add(shortcutInfo);
-//        //动态+静态快捷方式上限好像是4个，再添加会失败了 shortcutManager.getMaxShortcutCountPerActivity()返回的是15
-//        if (shortcutInfoList.size() > 4)
-//            shortcutInfoList.remove(0);
-//
-//        //设置图标，由于get到的信息会丢失图标，所以每次设置快捷方式前需要重新设置一遍
-//        setDynamicShortcuts(a, shortcutInfoList);
-//        Toast.makeText(a, a.getString(R.string.screen_shortcut_add_finish), Toast.LENGTH_LONG).show();
+//        throw new RuntimeException("测试");
+        //调起初始acitivity的intent，并添加额外参数
+        Intent intent = new Intent(a, MainActivity.class);
+        //extra好像要带包名前缀
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.putExtra(a.getPackageName() + DESKTOP_FILE_ABSOLUTE_PATH, shortcut.file.getAbsolutePath());
+        intent.putExtra(a.getPackageName() + CONTAINER_ID, shortcut.container.id);
+
+        //构建shortcutinfo，设置intent
+        ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(a, shortcut.name)
+                .setShortLabel(shortcut.name)
+                .setIntent(intent) //设置intent又不一定非要指向目标activity，那难道会加到栈中？如果不指定
+                .setActivity(new ComponentName(a, MainActivity.class.getName())) //设置目标activity
+                .build();
+
+        //使用旧版shortcutmanager，设置动态快捷方式
+        ShortcutManager shortcutManager = a.getSystemService(ShortcutManager.class);
+        List<ShortcutInfo> shortcutInfoList = shortcutManager.getDynamicShortcuts();
+        shortcutInfoList.add(shortcutInfo);
+        //动态+静态快捷方式上限好像是4个，再添加会失败了 shortcutManager.getMaxShortcutCountPerActivity()返回的是15
+        if (shortcutInfoList.size() > 4)
+            shortcutInfoList.remove(0);
+
+        //设置图标，由于get到的信息会丢失图标，所以每次设置快捷方式前需要重新设置一遍
+        setDynamicShortcuts(a, shortcutInfoList);
+        Toast.makeText(a, a.getString(R.string.screen_shortcut_add_finish), Toast.LENGTH_LONG).show();
     }
 
     /**
