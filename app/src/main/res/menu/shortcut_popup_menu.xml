@@ -12,5 +12,7 @@
         android:title="@string/remove" />
     <item
         android:id="@+id/shortcut_add_to_screen"
+        android:icon="@drawable/icon_add_shortcut_on_android_screen"
+        android:iconTint="@color/colorAccent"
         android:title="@string/add_to_screen" />
 </menu>
