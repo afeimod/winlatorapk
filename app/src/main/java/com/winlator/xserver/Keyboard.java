@@ -4,6 +4,7 @@ import android.view.KeyEvent;
 
 import androidx.collection.ArraySet;
 
+import com.example.datainsert.winlator.all.ExtraFeatures;
 import com.winlator.inputcontrols.ExternalController;
 
 import java.util.ArrayList;
@@ -112,6 +113,7 @@ public class Keyboard {
                 xServer.injectKeyRelease(xKeycode);
             }
         }
+        else ExtraFeatures.KeyInput.handleAndroidKeyEvent(xServer, event);
         return true;
     }
 
