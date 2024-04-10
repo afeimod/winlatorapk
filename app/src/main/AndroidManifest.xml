@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
+<!--    自定义application以全局捕捉异常-->
     <application
         android:name="com.example.datainsert.winlator.all.ExtraFeatures$MyApplication"
         android:icon="@mipmap/ic_launcher"
@@ -71,5 +72,18 @@
             android:theme="@style/AppTheme"
             android:exported="false"
             android:screenOrientation="sensor" />
+
+<!--        mt的文件提供器-->
+        <provider
+            android:name="bin.mt.file.content.MTDataFilesProvider"
+            android:permission="android.permission.MANAGE_DOCUMENTS"
+            android:exported="true"
+            android:authorities="com.winlator.MTDataFilesProvider"
+            android:grantUriPermissions="true">
+            <intent-filter>
+                <action
+                    android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
     </application>
 </manifest>
