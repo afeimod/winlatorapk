@@ -7,7 +7,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import com.winlator.xserver.Bitmask;
 import com.winlator.xserver.Window;
 import com.winlator.xserver.XKeycode;
 import com.winlator.xserver.XLock;
@@ -18,7 +17,7 @@ import com.winlator.xserver.events.MappingNotify;
 public class E2_KeyInput {
     private static final String TAG = "E2_KeyInput";
     /** 用于输入unicode文字时，临时充数的keycode */
-    public static final XKeycode[] avaiKeyCode = {XKeycode.KEY_A, XKeycode.KEY_B, XKeycode.KEY_C, XKeycode.KEY_D, XKeycode.KEY_E, XKeycode.KEY_F, XKeycode.KEY_G, XKeycode.KEY_H, XKeycode.KEY_I, XKeycode.KEY_J, XKeycode.KEY_K, XKeycode.KEY_L, XKeycode.KEY_M, XKeycode.KEY_N, XKeycode.KEY_O, XKeycode.KEY_P, XKeycode.KEY_Q, XKeycode.KEY_R, XKeycode.KEY_S, XKeycode.KEY_T, XKeycode.KEY_U, XKeycode.KEY_V, XKeycode.KEY_W, XKeycode.KEY_X, XKeycode.KEY_Y, XKeycode.KEY_Z,};
+    public static final XKeycode[] stubKeyCode = {XKeycode.KEY_A, XKeycode.KEY_B, XKeycode.KEY_C, XKeycode.KEY_D, XKeycode.KEY_E, XKeycode.KEY_F, XKeycode.KEY_G, XKeycode.KEY_H, XKeycode.KEY_I, XKeycode.KEY_J, XKeycode.KEY_K, XKeycode.KEY_L, XKeycode.KEY_M, XKeycode.KEY_N, XKeycode.KEY_O, XKeycode.KEY_P, XKeycode.KEY_Q, XKeycode.KEY_R, XKeycode.KEY_S, XKeycode.KEY_T, XKeycode.KEY_U, XKeycode.KEY_V, XKeycode.KEY_W, XKeycode.KEY_X, XKeycode.KEY_Y, XKeycode.KEY_Z,};
     /** 用于输入unicode文字时，记录本次该用哪个充数的keycode，然后++ */
     public static int  currIndex = 0;
 
@@ -33,22 +32,22 @@ public class E2_KeyInput {
         if(event.getAction() == KeyEvent.ACTION_MULTIPLE){
             String characters = event.getCharacters();
             for (int i = 0; i < characters.codePointCount(0, characters.length()); i++) {
-                int keycode = avaiKeyCode[currIndex].id;
+                int keycode = stubKeyCode[currIndex].id;
                 int keySym = characters.codePointAt(characters.offsetByCodePoints(0, i));
                 //大于0xff的，直接加上0x100,0000
                 if(keySym>0xff) keySym = keySym | 0x1000000;
 
                 int[] oriKeySyms = getCurrentKeysym(xServer, keycode);
 
-                xServer.injectKeyPress(avaiKeyCode[currIndex], keySym);
-                xServer.injectKeyRelease(avaiKeyCode[currIndex]);
+                xServer.injectKeyPress(stubKeyCode[currIndex], keySym);
+                xServer.injectKeyRelease(stubKeyCode[currIndex]);
 
                 //手动把keycode对应的unicode keysym改回来。直接Thread.sleep还不行，只能postDelay了
                 int[] nowKeySyms = getCurrentKeysym(xServer, keycode);
                 if(oriKeySyms[0] != nowKeySyms[0] || oriKeySyms[1] != nowKeySyms[1])
                     new Handler(Looper.getMainLooper()).postDelayed(()-> mappingKeySymBackToOrigin(xServer, (byte) keycode, oriKeySyms), 30);
 
-                currIndex = (currIndex+1)%avaiKeyCode.length;//数组下标+1，为下一次设置另一个keycode做准备
+                currIndex = (currIndex+1)% stubKeyCode.length;//数组下标+1，为下一次设置另一个keycode做准备
                 handled = true;
             }
             Log.d(TAG, "handleAKeyEvent: action=multiple, string="+characters);
