@@ -47,7 +47,7 @@ public class E2_KeyInput {
                 int[] nowKeySyms = getCurrentKeysym(xServer, keycode);
                 if(oriKeySyms[0] != nowKeySyms[0] || oriKeySyms[1] != nowKeySyms[1])
                     new Handler(Looper.getMainLooper()).postDelayed(()-> mappingKeySymBackToOrigin(xServer, (byte) keycode, oriKeySyms), 30);
-                
+
                 currIndex = (currIndex+1)%avaiKeyCode.length;//数组下标+1，为下一次设置另一个keycode做准备
                 handled = true;
             }
@@ -78,7 +78,7 @@ public class E2_KeyInput {
             Window eventWindow;
             if (focusedWindow.isAncestorOf(pointWindow)) {
                 eventWindow = pointWindow.getAncestorWithEventId(Event.KEY_PRESS, focusedWindow);
-            }else if (!focusedWindow.hasEventListenerFor(Event.KEY_PRESS))
+            }else if (focusedWindow.hasEventListenerFor(Event.KEY_PRESS))
                 eventWindow = focusedWindow;
             else return;
 
