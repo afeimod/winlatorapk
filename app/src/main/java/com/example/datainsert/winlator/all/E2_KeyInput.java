@@ -1,6 +1,7 @@
 package com.example.datainsert.winlator.all;
 
 import static com.winlator.xserver.Keyboard.KEYSYMS_PER_KEYCODE;
+import static com.winlator.xserver.Keyboard.isModifier;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -18,15 +19,25 @@ public class E2_KeyInput {
     private static final String TAG = "E2_KeyInput";
     /** 用于输入unicode文字时，临时充数的keycode */
     public static final XKeycode[] stubKeyCode = {XKeycode.KEY_A, XKeycode.KEY_B, XKeycode.KEY_C, XKeycode.KEY_D, XKeycode.KEY_E, XKeycode.KEY_F, XKeycode.KEY_G, XKeycode.KEY_H, XKeycode.KEY_I, XKeycode.KEY_J, XKeycode.KEY_K, XKeycode.KEY_L, XKeycode.KEY_M, XKeycode.KEY_N, XKeycode.KEY_O, XKeycode.KEY_P, XKeycode.KEY_Q, XKeycode.KEY_R, XKeycode.KEY_S, XKeycode.KEY_T, XKeycode.KEY_U, XKeycode.KEY_V, XKeycode.KEY_W, XKeycode.KEY_X, XKeycode.KEY_Y, XKeycode.KEY_Z,};
+    public static final int[] stubOriKeysyms = {97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,120,121,122};
     /** 用于输入unicode文字时，记录本次该用哪个充数的keycode，然后++ */
     public static int  currIndex = 0;
 
+    private static boolean isValidated = false;
+    private static void validate(XServer xServer){
+        if (isValidated) return;
+
+        assert stubKeyCode.length == stubOriKeysyms.length;
+        for(int idx=0; idx<stubKeyCode.length; idx++)
+            assert xServer.keyboard.hasKeysym(stubKeyCode[idx].id, stubOriKeysyms[idx]);
+    }
 
 
     /**
      * 此函数只处理KeyEvent.ACTION_MULTIPLE的情况
      */
     public static boolean handleAndroidKeyEvent(XServer xServer, KeyEvent event){
+        validate(xServer);
 
         boolean handled = false;
         if(event.getAction() == KeyEvent.ACTION_MULTIPLE){
@@ -40,12 +51,24 @@ public class E2_KeyInput {
                 int[] oriKeySyms = getCurrentKeysym(xServer, keycode);
 
                 xServer.injectKeyPress(stubKeyCode[currIndex], keySym);
+                sleep();
                 xServer.injectKeyRelease(stubKeyCode[currIndex]);
 
-                //手动把keycode对应的unicode keysym改回来。直接Thread.sleep还不行，只能postDelay了
-                int[] nowKeySyms = getCurrentKeysym(xServer, keycode);
-                if(oriKeySyms[0] != nowKeySyms[0] || oriKeySyms[1] != nowKeySyms[1])
-                    new Handler(Looper.getMainLooper()).postDelayed(()-> mappingKeySymBackToOrigin(xServer, (byte) keycode, oriKeySyms), 30);
+                //手动发送mappingNotify在游戏内也不行。不如直接再发送一遍原始keysym了自己内部处理去吧
+                sleep();
+                xServer.injectKeyPress(stubKeyCode[currIndex], stubOriKeysyms[currIndex]);
+                sleep();
+                xServer.injectKeyRelease(stubKeyCode[currIndex]);
+                sleep();
+                xServer.injectKeyPress(XKeycode.KEY_BKSP);
+                sleep();
+                xServer.injectKeyRelease(XKeycode.KEY_BKSP);
+                sleep();
+
+//                //手动把keycode对应的unicode keysym改回来。直接Thread.sleep还不行，只能postDelay了
+//                int[] nowKeySyms = getCurrentKeysym(xServer, keycode);
+//                if(oriKeySyms[0] != nowKeySyms[0] || oriKeySyms[1] != nowKeySyms[1])
+//                    new Handler(Looper.getMainLooper()).postDelayed(()-> mappingKeySymBackToOrigin(xServer, (byte) keycode, oriKeySyms), 30);
 
                 currIndex = (currIndex+1)% stubKeyCode.length;//数组下标+1，为下一次设置另一个keycode做准备
                 handled = true;
@@ -53,6 +76,14 @@ public class E2_KeyInput {
             Log.d(TAG, "handleAKeyEvent: action=multiple, string="+characters);
         }
         return handled;
+    }
+
+    private static void sleep(){
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static int[] getCurrentKeysym(XServer xServer, int keycode){

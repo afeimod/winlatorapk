@@ -100,7 +100,7 @@ public class Keyboard {
         int action = event.getAction();
         if (action == KeyEvent.ACTION_DOWN || action == KeyEvent.ACTION_UP) {
             int keyCode = event.getKeyCode();
-            int keysym = event.getUnicodeChar() != 0x0a ? event.getUnicodeChar() : 0xff0d;
+            int keysym = event.getUnicodeChar() != 0x0a ? event.getUnicodeChar() : 0xff0d; //修复回车键不生效
             XKeycode xKeycode = keycodeMap[keyCode];
             if (xKeycode == null) return false;
 
