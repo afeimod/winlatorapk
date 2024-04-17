@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
@@ -25,6 +26,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 
+import com.example.datainsert.winlator.all.ExtraFeatures;
 import com.google.android.material.navigation.NavigationView;
 import com.winlator.box86_64.Box86_64Preset;
 import com.winlator.box86_64.Box86_64PresetManager;
@@ -170,6 +172,8 @@ public class SettingsFragment extends Fragment {
                     .commit();
             }
         });
+
+        ExtraFeatures.SettingsExtra.addItems((AppCompatActivity) requireActivity(), (FrameLayout) view);
 
         return view;
     }

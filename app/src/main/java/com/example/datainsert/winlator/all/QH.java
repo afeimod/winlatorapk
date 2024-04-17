@@ -1,11 +1,14 @@
 package com.example.datainsert.winlator.all;
 
 import static android.content.pm.ApplicationInfo.FLAG_TEST_ONLY;
+import static android.os.Environment.DIRECTORY_DOWNLOADS;
+import static android.os.Environment.getExternalStoragePublicDirectory;
 
 
 import static com.example.datainsert.winlator.all.QH.dimen.dialogPadding;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -27,8 +30,10 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.widget.NestedScrollView;
 import androidx.preference.PreferenceManager;
 
+import com.winlator.R;
 import com.winlator.contentdialog.ContentDialog;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,6 +47,53 @@ public class QH {
     public static boolean hasBeenRefreshed = false;
     public static int versionCode = 0;
     public static String locale = "zh";
+    public static int dp8 = 16;
+
+    /**
+     * 初始化一次。可能耗时很久所以最好不要多次初始化
+     * 内容：是否为自己的apk，版本号（反射获取），语言，资源id
+     * 现在改为在MainActivity.onCreate里调用一次。不知道XServerDisplayActivity不调用有没有影响
+     */
+    public static void refreshIsTest(Activity a) {
+//        if(hasBeenRefreshed)
+//            return;
+
+        isTest = (a.getApplicationInfo().flags & FLAG_TEST_ONLY) != 0;
+        versionCode = refreshVersionCode(a);
+        locale = refreshLocale(a);
+//        refreshIdentifiers(a,"drawable",QH.drawable.class);
+//        refreshIdentifiers(a,"style",QH.style.class);
+//        refreshIdentifiers(a,"id",QH.id.class);
+        refreshTexts(locale);
+        dp8 = px(a, 8);
+        hasBeenRefreshed = true;
+
+        onActivityCreate(a);
+    }
+
+    /**
+     * 在QH的初始化函数末尾被调用。当activity启动（onCreate）时，进行一些app启动后需要自动执行的操作。
+     * <br/> 注意目前QH初始化是在MainActivity中被调用，如果XServer退出，那么这个函数会被再次调用，而且全部变量会被清空（因为使用runtime.exit()结束了进程）
+     */
+    private static void onActivityCreate(Activity a) {
+        ExtraFeatures.Logcat.onCheckChange(a, ExtraFeatures.Logcat.isChecked(a));
+    }
+
+    private static int refreshVersionCode(Context c) {
+        try {
+            PackageInfo info =  c.getPackageManager().getPackageInfo(c.getPackageName(), 0);
+            return Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                    ? (int)info.getLongVersionCode()
+                    :info.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    private static String refreshLocale(Context c) {
+        return c.getResources().getConfiguration().getLocales().get(0).getLanguage();
+    }
 
     public static int px(Context context, float dpValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
@@ -59,7 +111,7 @@ public class QH {
      */
     public static void makeDialogContentScrollable(Context a, ContentDialog dialog) {
         try {
-            FrameLayout frameRoot = dialog.findViewById(id.FrameLayout);
+            FrameLayout frameRoot = dialog.findViewById(R.id.FrameLayout);
             if (frameRoot.getChildCount() == 0)
                 return;
 
@@ -84,7 +136,7 @@ public class QH {
     //    public static Object reflectGetClassInst(){
 //
 //    }
-    public static Object reflectGetFieldInst(Class<?> clz, Object clzInst, String fieldName, boolean isHide) {
+    public static <T> T reflectGetFieldInst(Class<?> clz, Object clzInst, String fieldName, boolean isHide) {
         Object fieldInst = null;
         try {
             Field field = clz.getDeclaredField(fieldName);
@@ -96,7 +148,7 @@ public class QH {
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
-        return fieldInst;
+        return (T) fieldInst;
     }
 
     public static Object reflectInvokeMethod(Class<?> clz, String methodName, Class<?>[] clzs, Object inst, Object... params){
@@ -113,49 +165,6 @@ public class QH {
         }
     }
 
-    /**
-     * 初始化一次。可能耗时很久所以最好不要多次初始化
-     * 内容：是否为自己的apk，版本号（反射获取），语言，资源id
-     */
-    public static void refreshIsTest(Context c) {
-        if(hasBeenRefreshed)
-            return;
-
-        isTest = (c.getApplicationInfo().flags & FLAG_TEST_ONLY) != 0;
-        versionCode = refreshVersionCode(c);
-        locale = refreshLocale(c);
-        refreshIdentifiers(c,"drawable",QH.drawable.class);
-        refreshIdentifiers(c,"style",QH.style.class);
-        refreshIdentifiers(c,"id",QH.id.class);
-        refreshTexts(locale);
-
-        hasBeenRefreshed = true;
-    }
-
-    private static int refreshVersionCode(Context c) {
-        try {
-            PackageInfo info =  c.getPackageManager().getPackageInfo(c.getPackageName(), 0);
-            return Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
-                    ? (int)info.getLongVersionCode()
-                    :info.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            return 0;
-        }
-//        int version_code = 0;
-//        try {
-//            version_code = BuildConfig.class.getField("VERSION_CODE").getInt(BuildConfig.class);
-//        } catch (NoSuchFieldException | IllegalAccessException e) {
-//            e.printStackTrace();
-//        }
-//        Log.d(TAG, "readVersionCone: 读取版本号为" + version_code + ", isTest=" + isTest);
-//        return version_code;
-    }
-
-    private static String refreshLocale(Context c) {
-        return c.getResources().getConfiguration().getLocales().get(0).getLanguage();
-    }
-
 
     /**
      * 在给定的viewgroup中遍历全部子view，寻找特定条件的view
@@ -170,12 +179,12 @@ public class QH {
             ViewGroup currGroup = unCheckedViewGroups.remove(0);
             for (int i = 0; i < currGroup.getChildCount(); i++) {
                 View currSub = currGroup.getChildAt(i);
+                if (viewPattern.accept(currSub))
+                    return currSub;
                 if (currSub instanceof ViewGroup) {
                     unCheckedViewGroups.add((ViewGroup) currSub);
                     continue;
                 }
-                if (viewPattern.accept(currSub))
-                    return currSub;
             }
         }
         return null;
@@ -215,7 +224,7 @@ public class QH {
         linearRoot.addView(view);
 
         ImageView infoImage = new ImageView(a);
-        infoImage.setImageDrawable(AppCompatResources.getDrawable(a, QH.drawable.icon_help));
+        infoImage.setImageDrawable(AppCompatResources.getDrawable(a, R.drawable.icon_help));
         int imagePadding = QH.px(a, 5);
         infoImage.setPadding(0, imagePadding, 0, imagePadding);
         infoImage.setImageTintList(ColorStateList.valueOf(0xff607D8B));
@@ -235,6 +244,10 @@ public class QH {
 
     private static void versionNotSupported() {
         throw new RuntimeException("不支持的版本号：" + versionCode);
+    }
+
+    public static LayoutParams.Linear lpLinear(int w, int h) {
+        return LayoutParams.Linear.one(w, h);
     }
 
     private static void refreshTexts(String locale) {
@@ -269,6 +282,9 @@ public class QH {
             string.下载OBB结果 = "Downloading %s. Please don't switch interfaces. Download progress can be checked on the notification bar.$Download completed. Start decompression.$Download failed.";
             string.解压数据包 = "Uncompress OBB";
             string.Obb下载文件名 = "Winlator_OBB";
+
+            string.logcat日志 = "Logcat info";
+            string.logcat日志说明 = "Enable/Disable logcat info output, for debug use. output file is stored at /storage/emulated/0/Download/Winlator/logcat .";
         }else{
             string.pulse声音选项 = "PulseAudio声音服务";
             string.pulse声音简介 = "pulseaudio服务用于播放声音。本服务提取自XSDL。";
@@ -288,7 +304,6 @@ public class QH {
             string.pulse删除依赖库="删除文件";
             string.额外功能 = "额外功能";
 
-
             string.选择数据包说明 = "未找到数据包。请从本地选择，或从Github下载，或将数据包(名称为 %s )放到 %s 文件夹中，并重启app。\n手动选择时无法查看%s文件夹。";
             string.手动选择 = "手动选择";
             string.从Github下载 = "从Github下载原版数据包";
@@ -297,6 +312,9 @@ public class QH {
             string.下载OBB结果 = "正在下载%s，请勿切换界面。下载进度可在手机通知栏查看$下载完成，正在解压$下载失败";
             string.解压数据包 = "解压数据包";
             string.Obb下载文件名 = "Winlator数据包";
+
+            string.logcat日志 = "logcat日志";
+            string.logcat日志说明 = "开启或关闭安卓logcat日志，用于调试。\n\n日志文件存储在 /storage/emulated/0/Download/Winlator/logcat 目录下。";
         }
     }
 
@@ -319,6 +337,8 @@ public class QH {
 
 
     public static class string{
+        public static String logcat日志;
+        public static String logcat日志说明;
         public static String Obb下载文件名;
         public static String 解压数据包;
         public static String 下载OBB结果;
@@ -351,10 +371,12 @@ public class QH {
         boolean accept(View view);
     }
 
+    @Deprecated
     static class style {
         public static int ButtonNeutral;
     }
 
+    @Deprecated
     static class id {
         public static int BTCancel;
         public static int BTConfirm;
@@ -367,6 +389,7 @@ public class QH {
         public static int installing_obb_image;
     }
 
+    @Deprecated
     public static class drawable {
         public static int icon_help;
     }
@@ -422,6 +445,102 @@ public class QH {
             return d;
         }
 
+    }
+
+    public static class Files {
+        public static File Download() {
+            return getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS);
+        }
+    }
+
+    public static class LayoutParams {
+
+        /**
+         * 常见的LinearLayout.LayoutParams构建
+         */
+        public static class Linear {
+            private int w = -1;
+            private int h = -2;
+            private float weight = 0;
+            private int[] margins = {0, 0, 0, 0};
+            private int gravity = -111;
+//
+//            /**
+//             * 宽为match，高为rap
+//             */
+//            public static Linear one() {
+//                return new Linear();
+//            }
+
+            public static Linear one(int w, int h) {
+                Linear linear = new Linear();
+                linear.w = w;
+                linear.h = h;
+                return linear;
+            }
+
+            public Linear gravity(int pg) {
+                gravity = pg;
+                return this;
+            }
+
+            public Linear weight(float pw) {
+                weight = pw;
+                return this;
+            }
+
+            public Linear weight() {
+                weight = 1;
+                return this;
+            }
+
+            /**
+             * 顶部margin设为8dp
+             */
+            public Linear top() {
+                margins[1] = dp8;
+                return this;
+            }
+
+            public Linear top(int margin) {
+                margins[1] = margin;
+                return this;
+            }
+
+            public Linear bottom() {
+                margins[3] = dp8;
+                return this;
+            }
+
+            public Linear left() {
+                margins[0] = dp8;
+                return this;
+            }
+
+            public Linear left(int margin) {
+                margins[0] = margin;
+                return this;
+            }
+
+            public Linear right() {
+                margins[2] = dp8;
+                return this;
+            }
+
+            public Linear margin(int left, int top, int right, int bottom) {
+                margins = new int[]{left, top, right, bottom};
+                return this;
+            }
+
+            public LinearLayout.LayoutParams to() {
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(w, h, weight);
+                params.weight = weight;
+                if (gravity != -111)
+                    params.gravity = gravity;
+                params.setMargins(margins[0], margins[1], margins[2], margins[3]);
+                return params;
+            }
+        }
     }
 
 }

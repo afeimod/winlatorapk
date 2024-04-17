@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.preference.PreferenceManager;
 
+import com.winlator.R;
 import com.winlator.XServerDisplayActivity;
 import com.winlator.core.FileUtils;
 import com.winlator.core.TarCompressorUtils;
@@ -64,7 +65,7 @@ public class PulseAudio {
         linearBtnOnOff.setOrientation(LinearLayout.HORIZONTAL);
         LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(0, -2);
         btnParams.weight = 1;
-        Button btnOn = new Button(a, null, 0, QH.style.ButtonNeutral);
+        Button btnOn = new Button(a, null, 0, R.style.ButtonNeutral);
         btnOn.setText(QH.string.pulse按钮立即运行);
         btnOn.setOnClickListener(v -> {
             installAndExec(true);
@@ -73,7 +74,7 @@ public class PulseAudio {
         linearBtnOnOff.addView(btnOn, btnParams);
 
 
-        Button btnOff = new Button(a, null, 0, QH.style.ButtonNeutral);
+        Button btnOff = new Button(a, null, 0, R.style.ButtonNeutral);
         btnOff.setText(QH.string.pulse按钮立即停止);
         btnOff.setOnClickListener(v -> {
             installAndExec(false);
@@ -82,7 +83,7 @@ public class PulseAudio {
         linearBtnOnOff.addView(btnOff, btnParams);
         rootUI.addView(linearBtnOnOff);
 
-        Button btnNote = new Button(a, null, 0, QH.style.ButtonNeutral);
+        Button btnNote = new Button(a, null, 0, R.style.ButtonNeutral);
         btnNote.setText(QH.string.pulse按钮注意事项);
         btnNote.setOnClickListener(v -> showNoteDialog());
         rootUI.addView(btnNote);
@@ -93,14 +94,14 @@ public class PulseAudio {
         checkAuto.setOnCheckedChangeListener((buttonView, isChecked) -> QH.getPreference(a).edit().putBoolean(PREF_KEY_PULSE_AUTO, isChecked).apply());
         rootUI.addView(checkAuto);
 
-        FrameLayout frameLayout = mDialog.findViewById(QH.id.FrameLayout);
+        FrameLayout frameLayout = mDialog.findViewById(R.id.FrameLayout);
         frameLayout.setVisibility(View.VISIBLE);
         ScrollView rootScrollView = new ScrollView(a);
         rootScrollView.addView(rootUI);
         frameLayout.addView(rootScrollView);
 
-        mDialog.findViewById(QH.id.BTCancel).setVisibility(View.GONE);
-        mDialog.findViewById(QH.id.BTConfirm).setVisibility(View.GONE);
+        mDialog.findViewById(R.id.BTCancel).setVisibility(View.GONE);
+        mDialog.findViewById(R.id.BTConfirm).setVisibility(View.GONE);
         mDialog.show();
 
     }
@@ -118,7 +119,7 @@ public class PulseAudio {
         tvNote.setText(QH.string.pulse注意事项文字);
         linearRoot.addView(tvNote);
 
-        Button btnDelPulseDep = new Button(a, null, 0, QH.style.ButtonNeutral);
+        Button btnDelPulseDep = new Button(a, null, 0, R.style.ButtonNeutral);
         btnDelPulseDep.setText(QH.string.pulse删除依赖库);
         btnDelPulseDep.setEnabled(paWorkDir.exists());
         File rootfsDir = ImageFs.find(a).getRootDir();
@@ -129,12 +130,12 @@ public class PulseAudio {
         });
         linearRoot.addView(btnDelPulseDep);
 
-        FrameLayout frameLayout = noteDialog.findViewById(QH.id.FrameLayout);
+        FrameLayout frameLayout = noteDialog.findViewById(R.id.FrameLayout);
         frameLayout.setVisibility(View.VISIBLE);
         ScrollView scrollView = new ScrollView(a);
         scrollView.addView(linearRoot);
         frameLayout.addView(scrollView);
-        noteDialog.findViewById(QH.id.BTCancel).setVisibility(View.GONE);
+        noteDialog.findViewById(R.id.BTCancel).setVisibility(View.GONE);
         QH.makeDialogContentScrollable(a,noteDialog);
         noteDialog.show();
     }

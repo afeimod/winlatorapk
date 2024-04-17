@@ -35,7 +35,7 @@ public class OBBFinder {
      * 进入这里说明没找到文件，此时在主线程
      */
     public static void extract_3_2(MainActivity activity){
-        QH.refreshIsTest(activity);
+//        QH.refreshIsTest(activity);
 
         //内置obb
         String assetFileName = findBundled(activity);
@@ -53,7 +53,7 @@ public class OBBFinder {
         //手动选择
 
         //R.id.FLFragmentContainer 用add不用replace，这样containerFragment还是isVisible，按返回键直接退出app而不是回到container
-        activity.runOnUiThread(() -> activity.getSupportFragmentManager().beginTransaction().add(QH.id.FLFragmentContainer, new OBBSelectFragment(),"OBBSelectFragment").commit());
+        activity.runOnUiThread(() -> activity.getSupportFragmentManager().beginTransaction().add(R.id.FLFragmentContainer, new OBBSelectFragment(),"OBBSelectFragment").commit());
     }
 
     /**

@@ -29,6 +29,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 
 import com.winlator.MainActivity;
+import com.winlator.R;
 import com.winlator.core.Callback;
 import com.winlator.core.OnExtractFileListener;
 import com.winlator.core.TarCompressorUtils;
@@ -62,7 +63,7 @@ public class OBBSelectFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requireActivity().findViewById(QH.id.Toolbar).setVisibility(View.GONE);
+        requireActivity().findViewById(R.id.Toolbar).setVisibility(View.GONE);
 //        ((MainActivity)requireActivity()).getSupportActionBar().hide();
 
     }
@@ -105,7 +106,7 @@ public class OBBSelectFragment extends Fragment {
         tvResult = new TextView(c);
         tvResult.setTextColor(QH.attr.colorPrimary(c));
 
-        Button btnSelect = new Button(c, null, 0, QH.style.ButtonNeutral);
+        Button btnSelect = new Button(c, null, 0, R.style.ButtonNeutral);
         btnSelect.setText(QH.string.手动选择);
         btnSelect.setAllCaps(false);
         btnSelect.setOnClickListener(v -> {
@@ -118,12 +119,12 @@ public class OBBSelectFragment extends Fragment {
 
         });
 
-        Button btnDownload = new Button(c, null, 0, QH.style.ButtonNeutral);
+        Button btnDownload = new Button(c, null, 0, R.style.ButtonNeutral);
         btnDownload.setText(QH.string.从Github下载);
         btnDownload.setAllCaps(false);
         btnDownload.setOnClickListener(v -> downloadFromGithub());
 
-        Button btnExit = new Button(c, null, 0, QH.style.ButtonNeutral);
+        Button btnExit = new Button(c, null, 0, R.style.ButtonNeutral);
         btnExit.setText(QH.string.退出);
         btnExit.setAllCaps(false);
         btnExit.setOnClickListener(v -> dismissDialogAndInterruptThread(false));

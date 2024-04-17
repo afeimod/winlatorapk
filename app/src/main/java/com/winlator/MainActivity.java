@@ -28,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.example.datainsert.winlator.all.ExtraFeatures;
+import com.example.datainsert.winlator.all.QH;
 import com.google.android.material.navigation.NavigationView;
 import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
@@ -57,6 +58,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
+        //初始化QH信息
+        QH.refreshIsTest(this);
 
         drawerLayout = findViewById(R.id.DrawerLayout);
         NavigationView navigationView = findViewById(R.id.NavigationView);
