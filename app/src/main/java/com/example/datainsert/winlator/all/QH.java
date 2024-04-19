@@ -84,7 +84,7 @@ public class QH {
     //    public static Object reflectGetClassInst(){
 //
 //    }
-    public static Object reflectGetFieldInst(Class<?> clz, Object clzInst, String fieldName, boolean isHide) {
+    public static <T> T reflectGetFieldInst(Class<?> clz, Object clzInst, String fieldName, boolean isHide) {
         Object fieldInst = null;
         try {
             Field field = clz.getDeclaredField(fieldName);
@@ -96,7 +96,7 @@ public class QH {
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }
-        return fieldInst;
+        return (T) fieldInst;
     }
 
     public static Object reflectInvokeMethod(Class<?> clz, String methodName, Class<?>[] clzs, Object inst, Object... params){
