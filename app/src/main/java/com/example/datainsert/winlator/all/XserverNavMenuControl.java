@@ -4,25 +4,40 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAP
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
+
+import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
-import android.util.DisplayMetrics;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.SubMenu;
-import android.view.WindowManager;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.winlator.R;
 import com.winlator.XServerDisplayActivity;
 import com.winlator.contentdialog.ContentDialog;
 import com.winlator.core.EnvVars;
 import com.winlator.renderer.GLRenderer;
 import com.winlator.widget.TouchpadView;
+import com.winlator.xserver.Cursor;
+import com.winlator.xserver.CursorManager;
+import com.winlator.xserver.Drawable;
+import com.winlator.xserver.requests.DrawRequests;
 
-import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.util.Locale;
 
 public class XserverNavMenuControl {
     private static final String TAG = "XserverNavMenuControl";
@@ -30,10 +45,12 @@ public class XserverNavMenuControl {
     private static final String PREF_KEY_IS_GAME_STYLE_CURSOR = "IS_GAME_STYLE_CURSOR";
     private static final String PREF_KEY_IS_CUR_MOVE_REL = "IS_CUR_MOVE_REL";
     public static boolean isGameStyleCursor = false;
+    public static XServerDisplayActivity aInstance;
 
     @SuppressLint("SourceLockedOrientationActivity")
     public static void addItems(XServerDisplayActivity a) {
         try {
+            aInstance = a;
             QH.refreshIsTest(a);
             Log.d(TAG, "addItems: id为啥获取不到navigationview" + QH.id.NavigationView);
             NavigationView navigationView = a.findViewById(QH.id.NavigationView);
@@ -58,14 +75,97 @@ public class XserverNavMenuControl {
             });
 
 
-//            if(QH.isTest){
-//                subMenu.add("测试spinner").setOnMenuItemClickListener(item->{
-//                    AlertDialog dialog = new AlertDialog.Builder(a).setView(R.layout.container_detail_fragment).create();
-//                    dialog.show();
-//                    ContainerSettings.addOptionsTest(a,dialog.findViewById(R.id.SScreenSize).getRootView());
-//                    return true;
-//                });
-//            }
+            if(QH.isTest){
+                subMenu.add("查看cursor").setOnMenuItemClickListener(item->{
+                    //显示对应cursor的图片
+                    ImageView imageView = new ImageView(a);
+                    TextView textView = new TextView(a);
+                    textView.setTextColor(Color.WHITE);
+
+                    //可供选择的id
+                    LinearLayout linearCursorIds = new LinearLayout(a);
+                    linearCursorIds.setOrientation(LinearLayout.VERTICAL);
+
+                    SparseArray<Cursor> cursors = QH.reflectGetFieldInst(CursorManager.class, a.getXServer().cursorManager, "cursors", true);
+                    for(int keyIdx = 0; keyIdx < cursors.size(); keyIdx++) {
+                        int cursorId = cursors.keyAt(keyIdx);
+                        Cursor cursor = cursors.get(cursorId);
+                        Drawable d = cursor.cursorImage;
+                        Button btnId = new Button(a);
+                        btnId.setText(String.format(Locale.ROOT, "%d(%dx%d)",cursorId,d.width, d.height));
+                        btnId.setOnClickListener(new View.OnClickListener() {
+                            int flag = 0;
+                            @Override
+                            public void onClick(View v) {
+                                try {
+                                    String text = "";
+                                    Drawable image;
+                                    switch (flag) {
+                                        case 0-> {
+                                            image = cursor.cursorImage;
+                                            text += "cursorImage";
+                                        }
+                                        case 1 -> {
+                                            image = cursor.maskImage;
+                                            text += "maskImage";
+                                        }
+                                        case 2 -> {
+                                            image = cursor.sourceImage;
+                                            text += "sourceImage";
+                                        }
+                                        default -> throw new RuntimeException("");
+                                    }
+                                    ByteBuffer buffer = image.getData();
+                                    int[] colors = new int[image.width * image.height];
+                                    for(int i=0; i<colors.length; i++) {
+                                        colors[i] = buffer.getInt();// | 0x80000000;
+                                        if(colors[i] != 0x000000)
+                                            colors[i] = colors[i] | 0xff000000;
+                                    }
+                                    buffer.rewind();
+                                    Bitmap bitmap = Bitmap.createBitmap(colors,image.width, image.height, Bitmap.Config.ARGB_8888);
+                                    imageView.setImageBitmap(bitmap);
+
+                                    text += "\nid="+image.id;
+                                    text += "\ndepth="+(image.visual != null ? image.visual.depth : "null");
+                                    textView.setText(text);
+                                    flag = (flag + 1) % 3;
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                        linearCursorIds.addView(btnId);
+                    }
+                    ScrollView scrollView = new ScrollView(a);
+                    scrollView.addView(linearCursorIds);
+
+                    LinearLayout linearImageAndText = new LinearLayout(a);
+                    linearImageAndText.setOrientation(LinearLayout.VERTICAL);
+                    linearImageAndText.addView(imageView, new LinearLayout.LayoutParams(QH.px(a,160), QH.px(a, 160)));
+                    linearImageAndText.addView(textView);
+
+                    LinearLayout linearRoot = new LinearLayout(a);
+                    linearRoot.setBackgroundColor(Color.DKGRAY);
+                    linearRoot.setOrientation(LinearLayout.HORIZONTAL);
+                    linearRoot.addView(scrollView);
+                    linearRoot.addView(linearImageAndText);
+
+                    AlertDialog dialog = new AlertDialog.Builder(a)
+                            .setView(linearRoot)
+                            .create();
+                    dialog.show();
+                    return true;
+                });
+
+
+                linearBitmapList = new LinearLayout(a);
+                linearBitmapList.setOrientation(LinearLayout.VERTICAL);
+                linearBitmapList.setBackgroundColor(Color.DKGRAY);
+                ScrollView scrollView = new ScrollView(a);
+                scrollView.addView(linearBitmapList);
+                ((FrameLayout)a.findViewById(R.id.FLXServerDisplay)).addView(scrollView, new FrameLayout.LayoutParams(-2,-1));
+            }
 
 
             //记得根据默认设置进行初始化
@@ -90,6 +190,81 @@ public class XserverNavMenuControl {
             setIsCurMoveRel(a, getIsCurMoveRelFromPref(a), false);
 
         } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    static LinearLayout linearBitmapList;
+    public static void addBitmap(ByteBuffer data, int dstX, int dstY, int w, int h, int depth, DrawRequests.Format format){
+        try {
+            boolean depthIs1 = depth == 1;
+            int[] colors = new int[w * h];
+            try {
+                if(depthIs1 && format == DrawRequests.Format.Z_PIXMAP){
+                    byte[] bytes = data.array();
+                    int stride = ((w + 32 - 1) >> 5) << 2;
+                    for(int y=0; y<h; y++){
+                        for(int x=0; x<w; x++){
+                            int mask = (1 << (x & 7));
+                            int bit = (bytes[stride*y + (x>>3)] & mask) != 0 ? 1 : 0;
+                            colors[w*y+x] = bit !=0 ? Color.WHITE : Color.BLACK;
+                        }
+                    }
+                }
+                else
+                    for(int i=0; i<colors.length; i++) {
+                        colors[i] = depthIs1 ?data.get() : data.getInt();
+                    }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            Bitmap bitmap = Bitmap.createBitmap(colors,w, h, Bitmap.Config.ARGB_8888);
+            linearBitmapList.post(()->{
+                ImageView imageView = new ImageView(aInstance);
+                imageView.setImageBitmap(bitmap);
+                linearBitmapList.addView(imageView, 0, new ViewGroup.LayoutParams(80,80));
+                View view = new View(aInstance);
+                view.setBackgroundColor(Color.RED);
+                view.setMinimumHeight(4);
+                linearBitmapList.addView(view, 0);
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        data.rewind();
+    }
+
+    public static void addBitmap(Drawable image) {
+        try {
+            ByteBuffer buffer = image.getData();
+            int[] colors = new int[image.width * image.height];
+            for(int i=0; i<colors.length; i++) {
+                colors[i] = buffer.getInt() | 0xff000000;
+            }
+            buffer.rewind();
+            Bitmap bitmap = Bitmap.createBitmap(colors,image.width, image.height, Bitmap.Config.ARGB_8888);
+            linearBitmapList.post(()->{
+                ImageView imageView = new ImageView(aInstance);
+                imageView.setImageBitmap(bitmap);
+                linearBitmapList.addView(imageView, 0, new ViewGroup.LayoutParams(80,80));
+                View view = new View(aInstance);
+                view.setBackgroundColor(Color.RED);
+                view.setMinimumHeight(4);
+                linearBitmapList.addView(view, 0);
+
+                imageView.setOnClickListener(v->{
+                    FrameLayout frameLayout = new FrameLayout(aInstance);
+                    ImageView bigImage = new ImageView(aInstance);
+                    if(bitmap.getWidth()<50 || bigImage.getHeight() < 50)
+                        bigImage.setLayoutParams(new FrameLayout.LayoutParams(QH.px(aInstance,160),QH.px(aInstance,160)));
+                    bigImage.setImageBitmap(bitmap);
+                    frameLayout.addView(bigImage);
+                    new AlertDialog.Builder(aInstance)
+                            .setView(frameLayout)
+                            .show();
+                });
+            });
+        }catch (Exception e){
             e.printStackTrace();
         }
     }
@@ -175,5 +350,6 @@ public class XserverNavMenuControl {
             e.printStackTrace();
         }
     }
+
 
 }

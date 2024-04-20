@@ -1,5 +1,7 @@
 package com.winlator.xserver.requests;
 
+import android.util.Log;
+
 import com.winlator.xconnector.XInputStream;
 import com.winlator.xconnector.XOutputStream;
 import com.winlator.xserver.Drawable;
@@ -16,6 +18,7 @@ public abstract class PixmapRequests {
         int drawableId = inputStream.readInt();
         short width = inputStream.readShort();
         short height = inputStream.readShort();
+//        Log.d("TAG", "createPixmap: depth="+depth+", pid="+pixmapId+", drawable="+drawableId+", width="+width+", height="+height);
 
         if (!client.isValidResourceId(pixmapId)) throw new BadIdChoice(pixmapId);
 

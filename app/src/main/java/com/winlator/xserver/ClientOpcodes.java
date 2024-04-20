@@ -45,6 +45,7 @@ public abstract class ClientOpcodes {
     public static final byte CREATE_CURSOR = 93;
     public static final byte CREATE_GLYPH_CURSOR = 94;
     public static final byte FREE_CURSOR = 95;
+    public static final byte RECOLOR_CURSOR = 96;
     public static final byte QUERY_EXTENSION = 98;
     public static final byte GET_KEYBOARD_MAPPING = 101;
     public static final byte BELL = 104;

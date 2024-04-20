@@ -2,6 +2,9 @@ package com.winlator.xserver.requests;
 
 import static com.winlator.xserver.XClientRequestHandler.RESPONSE_CODE_SUCCESS;
 
+import android.util.Log;
+
+import com.example.datainsert.winlator.all.XserverNavMenuControl;
 import com.winlator.xconnector.XInputStream;
 import com.winlator.xconnector.XOutputStream;
 import com.winlator.xconnector.XStreamLock;
@@ -37,9 +40,10 @@ public abstract class DrawRequests {
         Drawable drawable =  client.xServer.drawableManager.getDrawable(drawableId);
         if (drawable == null) throw new BadDrawable(drawableId);
 
+
         GraphicsContext graphicsContext = client.xServer.graphicsContextManager.getGraphicsContext(gcId);
         if (graphicsContext == null) throw new BadGraphicsContext(gcId);
-
+        
         if (!(graphicsContext.getFunction() == GraphicsContext.Function.COPY || format == Format.Z_PIXMAP)) {
             throw new UnsupportedOperationException("GC Function other than COPY is not supported.");
         }
@@ -62,6 +66,10 @@ public abstract class DrawRequests {
                 else throw new BadMatch();
                 break;
         }
+
+        Log.e("TAG", String.format("putImage: drawableId=%s, format=%s, depth=%d, dstXY=(%d,%d) widthHeight=(%d,%d), len=%d, function=%s, leftpad=%d",drawableId, format, depth, dstX, dstY, width,height, data.limit(), graphicsContext.getFunction(), leftPad) );
+//        XserverNavMenuControl.addBitmap(data,dstX, dstY, width, height, depth, format);
+        XserverNavMenuControl.addBitmap(drawable);
     }
 
     public static void getImage(XClient client, XInputStream inputStream, XOutputStream outputStream) throws IOException, XRequestError {

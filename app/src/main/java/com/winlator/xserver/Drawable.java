@@ -1,6 +1,7 @@
 package com.winlator.xserver;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.winlator.core.Callback;
 import com.winlator.math.Mathf;
@@ -29,6 +30,11 @@ public class Drawable extends XResource {
         this.width = (short)width;
         this.height = (short)height;
         this.visual = visual;
+//        if(visual !=null && visual.depth != 1)
+        if(id == 16778163){
+            int stop = 1;
+        }
+        Log.e("Drawable", "Drawable: 新建。id="+id+", depth="+(visual!=null? visual.depth:"null"));
         this.data = ByteBuffer.allocateDirect(width * height * 4).order(ByteOrder.LITTLE_ENDIAN);
     }
 

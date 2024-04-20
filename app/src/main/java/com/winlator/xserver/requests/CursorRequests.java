@@ -1,10 +1,14 @@
 package com.winlator.xserver.requests;
 
+import android.util.Log;
+
 import com.winlator.xconnector.XInputStream;
 import com.winlator.xconnector.XOutputStream;
 import com.winlator.xserver.Cursor;
+import com.winlator.xserver.CursorManager;
 import com.winlator.xserver.Pixmap;
 import com.winlator.xserver.XClient;
+import com.winlator.xserver.errors.BadCursor;
 import com.winlator.xserver.errors.BadIdChoice;
 import com.winlator.xserver.errors.BadMatch;
 import com.winlator.xserver.errors.BadPixmap;
@@ -46,5 +50,28 @@ public abstract class CursorRequests {
 
     public static void freeCursor(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError {
         client.xServer.cursorManager.freeCursor(inputStream.readInt());
+    }
+
+    /**
+     * The XRecolorCursor() function changes the color of the specified cursor,
+     * and if the cursor is being displayed on a screen, the change is visible immediately.
+     * The pixel members of the XColor structures are ignored; only the RGB values are used.
+     * @throws XRequestError BadCursor
+     */
+    public static void recolorCursor(XClient client, XInputStream inputStream, XOutputStream outputStream) throws XRequestError{
+        Log.e("TAG", "recolorCursor: 进入此请求");
+        int cursorId = inputStream.readInt();
+        byte foreRed = (byte)inputStream.readShort();
+        byte foreGreen = (byte)inputStream.readShort();
+        byte foreBlue = (byte)inputStream.readShort();
+        byte backRed = (byte)inputStream.readShort();
+        byte backGreen = (byte)inputStream.readShort();
+        byte backBlue = (byte)inputStream.readShort();
+
+        CursorManager manager = client.xServer.cursorManager;
+        Cursor cursor = manager.getCursor(cursorId);
+        if(cursor == null)
+            throw new BadCursor(cursorId);
+        manager.recolorCursor(cursor, foreRed, foreGreen, foreBlue, backRed, backGreen, backBlue);
     }
 }

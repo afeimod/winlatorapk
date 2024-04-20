@@ -1,5 +1,8 @@
 package com.winlator.xserver;
 
+import static java.lang.Integer.toHexString;
+
+import android.util.Log;
 import android.util.SparseArray;
 
 import java.nio.IntBuffer;
@@ -43,10 +46,17 @@ public class CursorManager extends XResourceManager {
     }
 
     public void recolorCursor(Cursor cursor, byte foreRed, byte foreGreen, byte foreBlue, byte backRed, byte backGreen, byte backBlue) {
+        String str = "maskImage!=null: "+(cursor.maskImage != null);
         if (cursor.maskImage != null) {
             boolean visible = !isEmptyMaskImage(cursor.maskImage);
+            str += ", visible="+visible;
             cursor.setVisible(visible);
             if (visible) cursor.cursorImage.drawAlphaMaskedBitmap(foreRed, foreGreen, foreBlue, backRed, backGreen, backBlue, cursor.sourceImage, cursor.maskImage);
         }
+        Log.e("TAG", "recolorCursor: cursorid="+cursors.indexOfValue(cursor)+", "+str
+                +String.format(", sourceId=%s, maskId=%s",(cursor.sourceImage!=null?cursor.sourceImage.id:"-1"),(cursor.maskImage!=null?cursor.maskImage.id:"-1"))
+         +String.format(", foreRGB=%s,%s,%s, backRGB=%s,%s,%s",
+                toHexString(foreRed), toHexString(foreGreen), toHexString(foreBlue),
+                toHexString(backRed), toHexString(backGreen), toHexString(backBlue)));
     }
 }

@@ -1,5 +1,7 @@
 package com.winlator.xserver;
 
+import android.util.Log;
+
 import com.winlator.xconnector.Client;
 import com.winlator.xconnector.RequestHandler;
 import com.winlator.xconnector.XInputStream;
@@ -352,6 +354,7 @@ public class XClientRequestHandler implements RequestHandler {
                     }
                     break;
                 case ClientOpcodes.CREATE_COLORMAP:
+                    Log.d("TAG", "handleNormalRequest: CREATE_COLORMAP 跳过该请求");
                     client.skipRequest();
                     break;
                 case ClientOpcodes.FREE_COLORMAP:
@@ -363,11 +366,17 @@ public class XClientRequestHandler implements RequestHandler {
                     }
                     break;
                 case ClientOpcodes.CREATE_GLYPH_CURSOR:
+                    Log.d("TAG", "handleNormalRequest: CREATE_GLYPH_CURSOR 跳过该请求");
                     client.skipRequest();
                     break;
                 case ClientOpcodes.FREE_CURSOR:
                     try (XLock lock = client.xServer.lock(XServer.Lockable.PIXMAP_MANAGER, XServer.Lockable.DRAWABLE_MANAGER, XServer.Lockable.CURSOR_MANAGER)) {
                         CursorRequests.freeCursor(client, inputStream, outputStream);
+                    }
+                    break;
+                case ClientOpcodes.RECOLOR_CURSOR:
+                    try (XLock lock = client.xServer.lock(XServer.Lockable.PIXMAP_MANAGER, XServer.Lockable.DRAWABLE_MANAGER, XServer.Lockable.CURSOR_MANAGER)) {
+                        CursorRequests.recolorCursor(client, inputStream, outputStream);
                     }
                     break;
                 case ClientOpcodes.QUERY_EXTENSION:
