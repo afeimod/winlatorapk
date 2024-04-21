@@ -196,24 +196,7 @@
                     android:text="@string/xserver" />
             </FrameLayout>
 
-            <View android:layout_height="16dp" style="@style/HorizontalLine" />
-
-<!--            额外设置(改成inclue吧）-->
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <LinearLayout
-                    style="@style/FieldSet"
-                    android:id="@+id/setting_linear_other_root" />
-                <TextView
-                    style="@style/FieldSetLabel"
-                    android:text="额外" />
-            </FrameLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="80dp" />
+            <include layout="@layout/zzz_settings_fragment_extra" />
         </LinearLayout>
     </ScrollView>
 

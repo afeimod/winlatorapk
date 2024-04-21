@@ -251,9 +251,6 @@ public class QH {
     }
 
     private static void refreshTexts(String locale) {
-
-
-
         if(!locale.equals("zh")){
             string.pulse声音选项 = "PulseAudio Server";
             string.pulse声音简介 = "Pulseaudio is used to play audio. This version is extracted from XSDL.";

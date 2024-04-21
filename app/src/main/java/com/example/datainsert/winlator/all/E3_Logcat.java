@@ -12,7 +12,7 @@ import com.winlator.R;
 
 import java.io.File;
 
-public class E3_Logcat {
+class E3_Logcat {
     private static final String TAG = "Logcat";
     private static final String PREF_KEY_LOGCAT_ENABLE = "logcat_enable";
     //视图可能多次进入，但process只需要运行一次。所以static记录一个，如果发现此值不为null，则跳过进程创建。
