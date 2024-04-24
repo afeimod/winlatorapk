@@ -19,7 +19,7 @@ class E0_MyApplication extends Application {
         super.onCreate();
 
         // 注册全局异常处理类
-        String logFilePath = getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS) + "/crash-%s.log";
+        String logFilePath = getExternalStoragePublicDirectory(DIRECTORY_DOWNLOADS) + "/Winlator/crash/crash-%s.log";
         Thread.setDefaultUncaughtExceptionHandler(new CrashExceptionHandler(logFilePath));
 
     }

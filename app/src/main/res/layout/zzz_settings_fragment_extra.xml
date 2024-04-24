@@ -5,7 +5,6 @@
     android:orientation="vertical">
     <View android:layout_height="16dp" style="@style/HorizontalLine" />
 
-    <!--            额外设置(改成inclue吧）-->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

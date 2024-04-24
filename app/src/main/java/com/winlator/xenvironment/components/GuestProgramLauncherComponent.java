@@ -6,6 +6,7 @@ import android.os.Process;
 
 import androidx.preference.PreferenceManager;
 
+import com.example.datainsert.winlator.all.ExtraFeatures;
 import com.winlator.MainActivity;
 import com.winlator.box86_64.Box86_64Preset;
 import com.winlator.box86_64.Box86_64PresetManager;
@@ -147,7 +148,9 @@ public class GuestProgramLauncherComponent extends EnvironmentComponent {
         envVars.put("PROOT_LOADER_32", nativeLibraryDir+"/libproot-loader32.so");
 
         if (MainActivity.DEBUG_LEVEL >= 1) ProcessHelper.debugMode = true;
-        return ProcessHelper.exec(command, envVars.toStringArray(), rootDir, (status) -> {
+//        return ProcessHelper.exec(command, envVars.toStringArray(), rootDir, (status) -> {
+        //改为根据条件重定向输入输出流
+        return ExtraFeatures.PRootShell.exec(context, command, envVars.toStringArray(), rootDir, (status) -> {
             synchronized (lock) {
                 pid = -1;
             }

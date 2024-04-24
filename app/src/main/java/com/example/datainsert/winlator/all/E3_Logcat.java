@@ -2,13 +2,9 @@ package com.example.datainsert.winlator.all;
 
 import android.content.Context;
 import android.widget.CheckBox;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.datainsert.winlator.all.e3.LogInfoManager;
-import com.winlator.R;
 
 import java.io.File;
 
@@ -19,10 +15,7 @@ class E3_Logcat {
     // 有个问题就是xserverActivity退回到MainActivity切换时，直接使用Runtime.exit然后新启动一个activity，导致这里变成null。
     private static Process runningProcess = null;
 
-    public static void addItems(AppCompatActivity a, FrameLayout hostRoot) {
-        LogInfoManager manager = new LogInfoManager(a);
-
-        // logcat日志
+    public static void addItemToSettings(AppCompatActivity a, LinearLayout hostRoot) {
         CheckBox checkLogcat = new CheckBox(a);
         checkLogcat.setText(QH.string.logcat日志);
         checkLogcat.setChecked(isChecked(a));
@@ -30,8 +23,7 @@ class E3_Logcat {
         checkLogcat.setOnCheckedChangeListener((v, isChecked) -> onCheckChange(v.getContext(), isChecked));
 
         LinearLayout linearLogcat = QH.wrapHelpBtnWithLinear(a, checkLogcat, QH.string.logcat日志说明);
-        LinearLayout myLinearRoot = hostRoot.findViewById(R.id.setting_linear_other_root);
-        myLinearRoot.addView(linearLogcat, QH.lpLinear(-1, -2).top().to());
+        hostRoot.addView(linearLogcat, QH.lpLinear(-1, -2).top().to());
     }
 
     public static boolean isChecked(Context context) {

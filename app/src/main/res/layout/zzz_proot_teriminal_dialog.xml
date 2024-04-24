@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <!--    #F6F6F6-->
+    <!--    用于把视图高度撑起来，否则dialog默认是wrap，高度无法顶满-->
+    <View
+        android:layout_width="2dp"
+        android:layout_height="4000dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nested_scroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/edittext_input"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/terminal_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lineSpacingMultiplier="1.3"
+                android:textIsSelectable="true"
+                android:padding="8dp"
+                android:text="\tfsfsdfsdfsdfsf\nnsdfsfsdf
+fsfsdfsdfsfssfsfsfsfsdfsfsfsfsfsfsdfsfsfsfsfsfsdfsffsfsdfsdfsfssfsfsfsfsdfsfsfsfsfsfsdfsfsfsfsfsfsdfsfsdfsfsfsfsfsdfsf
+               \n\n\n\n\n\n\\n\n\\n\n\n\n\n\n\n\n\n\n\ \n\n\n\n\n\n\\n\n\\n\n\n\n\n\n\n\n\n\n\  \n\n\n\n\n\n\\n\n\\n\n\n\n\n\n\n\n\n\n\naaa"
+                android:textColor="@android:color/primary_text_light" />
+
+        </HorizontalScrollView>
+    </androidx.core.widget.NestedScrollView>
+
+
+    <EditText
+        android:id="@+id/edittext_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="#E8E8E8"
+        android:gravity="start|center_vertical"
+        android:hint="在此处输入命令"
+        android:inputType="text|textMultiLine"
+        android:maxHeight="88dp"
+        android:padding="8dp"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_menu"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/nested_scroll" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btn_menu"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_list_item_menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/edittext_input" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_menu_items"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="background_menu_items,btn_text_size_up,btn_text_size_down,btn_help,btn_close" />
+
+    <View
+        android:id="@+id/background_menu_items"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/content_dialog_background"
+        android:scaleX="1.2"
+        android:scaleY="1.2"
+        app:layout_constraintBottom_toBottomOf="@id/btn_text_size_up"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/btn_text_size_down"
+        app:layout_constraintTop_toTopOf="@id/btn_close" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btn_text_size_up"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_zoom_plus"
+        app:layout_constraintBottom_toTopOf="@id/btn_menu"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_help" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btn_text_size_down"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_zoom_minus"
+        app:layout_constraintBottom_toBottomOf="@id/btn_text_size_up"
+        app:layout_constraintEnd_toStartOf="@id/btn_text_size_up"
+        app:layout_constraintTop_toTopOf="@id/btn_text_size_up" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btn_help"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_help"
+        android:text="Help"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@id/btn_text_size_up"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_close" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btn_close"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_exit"
+        android:text="Close"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@id/btn_help"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

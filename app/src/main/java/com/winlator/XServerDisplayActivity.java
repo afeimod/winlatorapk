@@ -20,8 +20,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.preference.PreferenceManager;
 
-import com.example.datainsert.winlator.all.QH;
-import com.example.datainsert.winlator.all.XserverNavMenuControl;
+import com.example.datainsert.winlator.all.ExtraFeatures;
 import com.google.android.material.navigation.NavigationView;
 import com.winlator.container.Container;
 import com.winlator.container.ContainerManager;
@@ -78,8 +77,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 
 public class XServerDisplayActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -207,7 +204,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             setupXEnvironment();
         });
 
-        XserverNavMenuControl.addItems(this);
+        ExtraFeatures.XMenuExtra.addItemsAndInit(this);
     }
 
     @Override
@@ -355,8 +352,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     }
 
     private void setupXEnvironment() {
-        envVars.put("MESA_DEBUG", "silent");
-        envVars.put("MESA_NO_ERROR", "1");
+//        envVars.put("MESA_DEBUG", "silent");
+//        envVars.put("MESA_NO_ERROR", "1");
         envVars.put("WINEPREFIX", ImageFs.WINEPREFIX);
         if (MainActivity.DEBUG_LEVEL <= 1) envVars.put("WINEDEBUG", "-all");
 
@@ -510,7 +507,7 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
             else hideInputControls();
         });
 
-        XserverNavMenuControl.addInputControlsItems(this,dialog);
+        ExtraFeatures.ClickToMovePointer.addInputControlsItems(this, dialog);
         dialog.show();
     }
 

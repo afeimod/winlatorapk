@@ -11,6 +11,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -19,6 +20,7 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Looper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -30,8 +32,11 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.widget.NestedScrollView;
 import androidx.preference.PreferenceManager;
 
+import com.example.datainsert.winlator.all.resouces.StringEn;
+import com.example.datainsert.winlator.all.resouces.StringZh;
 import com.winlator.R;
 import com.winlator.contentdialog.ContentDialog;
+import com.winlator.core.AppUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -133,10 +138,7 @@ public class QH {
         }
     }
 
-    //    public static Object reflectGetClassInst(){
-//
-//    }
-    public static <T> T reflectGetFieldInst(Class<?> clz, Object clzInst, String fieldName, boolean isHide) {
+    public static <T> T reflectGetField(Class<?> clz, Object clzInst, String fieldName, boolean isHide) {
         Object fieldInst = null;
         try {
             Field field = clz.getDeclaredField(fieldName);
@@ -149,6 +151,21 @@ public class QH {
             throwable.printStackTrace();
         }
         return (T) fieldInst;
+    }
+
+    public static int reflectGetFieldInt(Class<?> clz, Object clzInst, String fieldName, boolean isHide) {
+        int fieldInst = 0;
+        try {
+            Field field = clz.getDeclaredField(fieldName);
+            if (isHide)
+                field.setAccessible(true);
+            fieldInst = field.getInt(clzInst);
+            if (isHide)
+                field.setAccessible(false);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+        return fieldInst;
     }
 
     public static Object reflectInvokeMethod(Class<?> clz, String methodName, Class<?>[] clzs, Object inst, Object... params){
@@ -227,15 +244,8 @@ public class QH {
         infoImage.setImageDrawable(AppCompatResources.getDrawable(a, R.drawable.icon_help));
         int imagePadding = QH.px(a, 5);
         infoImage.setPadding(0, imagePadding, 0, imagePadding);
-        infoImage.setImageTintList(ColorStateList.valueOf(0xff607D8B));
-        infoImage.setOnClickListener(v -> {
-            new AlertDialog
-                    .Builder(a)
-                    .setMessage(info)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .create()
-                    .show();
-        });
+        infoImage.setImageTintList(ColorStateList.valueOf(a.getColor(R.color.colorPrimaryDark)));
+        infoImage.setOnClickListener(v -> showConfirmDialog(a, info, null));
         LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams(-2, -1);
         imageParams.setMarginStart(QH.px(a, 8));
         linearRoot.addView(infoImage, imageParams);
@@ -250,68 +260,23 @@ public class QH {
         return LayoutParams.Linear.one(w, h);
     }
 
+    /**
+     * 显示一个二次确认的对话框
+     */
+    public static void showConfirmDialog(Context c, String s, DialogInterface.OnClickListener onClickListener) {
+        new AlertDialog.Builder(c)
+                .setMessage(s)
+                .setPositiveButton(android.R.string.ok, onClickListener)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setCancelable(false)
+                .show();
+    }
+
     private static void refreshTexts(String locale) {
         if(!locale.equals("zh")){
-            string.pulse声音选项 = "PulseAudio Server";
-            string.pulse声音简介 = "Pulseaudio is used to play audio. This version is extracted from XSDL.";
-            string.旋转屏幕选项 = "Rotate Screen";
-            string.游戏样式光标选项 = "Use Game Style Cursor";
-            string.游戏样式光标选项说明 = "Winlator inherits the xserver bug from exagear, which can't display mouse cursor image sometimes. If cursor drawable is not available, an alternate png image is used." +
-                    "\n\nIf this option is checked, xserver will first try to get and display the cursor drawable with game's style. However colors will be only black and white, and the dynamic cursor can only be displayed as a static image.";
-            string.绝对位置点击选项 = "Cursor moves to where finger presses";
-            string.绝对位置点击选项说明 = "If checked, cursor will go to where you finger is when pressing.\n1 finger click = mouse left click.\n1st finger pressing, 2nd finger press and moving = mouse left button drag and drop.\n1st finger pressing, 2nd finger quick tap = mouse right button click.";
-            string.pulse按钮立即运行 = "Run now";
-            string.pulse按钮立即停止="Stop now";
-            string.pulse按钮注意事项="Note";
-            string.pulse选项自动运行="Autorun after container started";
-            string.pulse注意事项文字="Test only, does not guarantee better sound playback than Alsa." +
-                    "\n\nWhen starting, the missing dep-libs are automatically unpacked." +
-                    "These libs were removed from obb originally, so I'm not sure if there is any conflicts." +
-                    "Click the button to remove these files if there is." ;
-            string.pulse删除依赖库="Delete libs";
-            string.额外功能 =  "Extra";
-
-            string.选择数据包说明 = "OBB not found. Please select it from local files, or download it from Github, or put the obb file(renamed as %s) into %s and restart the app.\nNote that when manually selecting you cannot see the directory of %s.";
-            string.手动选择 = "Manually Select";
-            string.从Github下载 = "Download from Github";
-            string.退出 = "Exit";
-            string.选择OBB结果 = "Selection cancelled$Selected file(%s) is not an obb file for winlator. Please select another one.$Obb (%s) selected. Start decompression. Please don't switch interfaces.";
-            string.下载OBB结果 = "Downloading %s. Please don't switch interfaces. Download progress can be checked on the notification bar.$Download completed. Start decompression.$Download failed.";
-            string.解压数据包 = "Uncompress OBB";
-            string.Obb下载文件名 = "Winlator_OBB";
-
-            string.logcat日志 = "Logcat info";
-            string.logcat日志说明 = "Enable/Disable logcat info output, for debug use. output file is stored at /storage/emulated/0/Download/Winlator/logcat .";
+            StringEn.apply();
         }else{
-            string.pulse声音选项 = "PulseAudio声音服务";
-            string.pulse声音简介 = "pulseaudio服务用于播放声音。本服务提取自XSDL。";
-            string.旋转屏幕选项 = "旋转屏幕";
-            string.游戏样式光标选项 = "光标样式尽量使用游戏样式";
-            string.游戏样式光标选项说明 = "winlator继承了exagear的xserver的bug，在使用gpu渲染时鼠标光标无法正常显示，因此一般使用一个备用png图片作为鼠标光标。" +
-                    "\n\n若勾选此选项，会首先尝试获取游戏样式的光标，但色彩只有黑白，且动态光标只能显示为静态图片。";
-            string.绝对位置点击选项 = "触屏后 鼠标移动到手指位置";
-            string.绝对位置点击选项说明 = "如果勾选该选项，手指按下时，光标立即移动到对应位置。\n单指点击=鼠标左键点击.\n一指按住，第二指按下并移动=左键拖拽。\n一指按住，第二指按下并立刻松开=右键点击。";
-            string.pulse按钮立即运行 = "立即运行";
-            string.pulse按钮立即停止="立即停止";
-            string.pulse按钮注意事项="注意事项";
-            string.pulse选项自动运行="启动容器后自动运行";
-            string.pulse注意事项文字="本功能仅供测试，不保证声音播放效果比alsa更好。" +
-                    "\n\n运行pulseaudio服务时，缺少的依赖库文件会被自动解压补全。" +
-                    "作者制作数据包的脚本中特意移除了这些库，所以不确定补全后是否会有冲突。若有冲突，请点击按钮删除这些文件。";
-            string.pulse删除依赖库="删除文件";
-            string.额外功能 = "额外功能";
-
-            string.选择数据包说明 = "未找到数据包。请从本地选择，或从Github下载，或将数据包(名称为 %s )放到 %s 文件夹中，并重启app。\n手动选择时无法查看%s文件夹。";
-            string.手动选择 = "手动选择";
-            string.从Github下载 = "从Github下载原版数据包";
-            string.退出 = "退出";
-            string.选择OBB结果 = "选择文件取消$选择文件不是数据包(%s)。请重新选择$已选择数据包(%s)，开始解压，请勿切换界面";
-            string.下载OBB结果 = "正在下载%s，请勿切换界面。下载进度可在手机通知栏查看$下载完成，正在解压$下载失败";
-            string.解压数据包 = "解压数据包";
-            string.Obb下载文件名 = "Winlator数据包";
-
-            string.logcat日志 = "logcat日志";
-            string.logcat日志说明 = "开启或关闭安卓logcat日志，用于调试。\n\n日志文件存储在 /storage/emulated/0/Download/Winlator/logcat 目录下。";
+            StringZh.apply();
         }
     }
 
@@ -332,8 +297,30 @@ public class QH {
         }
     }
 
+    /**
+     * 当出现致命错误时，显示对话框。点击确定后重启activity。静止20秒后会自动重启。
+     */
+    public static void showFatalErrorDialog(Context c, String text) {
+        new Thread(()->{
+            Looper.prepare();
+            QH.showConfirmDialog(c, text, (dialog, which) -> AppUtils.restartApplication(c));
+            Looper.loop();
+        }).start();
+
+        try {
+            Thread.sleep(20000);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        AppUtils.restartApplication(c);
+    }
+
 
     public static class string{
+        public static String proot终端_请先开启选项;
+        public static String proot终端_启动失败_请关闭选项重试;
+        public static String proot终端;
+        public static String proot终端说明;
         public static String logcat日志;
         public static String logcat日志说明;
         public static String Obb下载文件名;
@@ -358,6 +345,7 @@ public class QH {
         public static String 额外功能;
         public static String 选择数据包说明;
         public static String 手动选择;
+
     }
 
     public static String[] getSArr(String s){

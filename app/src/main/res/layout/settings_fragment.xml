@@ -195,7 +195,6 @@
                     style="@style/FieldSetLabel"
                     android:text="@string/xserver" />
             </FrameLayout>
-
             <include layout="@layout/zzz_settings_fragment_extra" />
         </LinearLayout>
     </ScrollView>
