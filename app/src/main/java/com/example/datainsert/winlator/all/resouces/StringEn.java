@@ -36,18 +36,22 @@ public class StringEn {
         QH.string.logcat日志说明 = "Enable/Disable logcat info output, for debug use. output file is stored at /storage/emulated/0/Download/Winlator/logcat .";
         QH.string.proot终端 = "PRoot mini shell";
         QH.string.proot终端说明 = """
-                    If enabled, you can see the outputs and send inputs to the proot process.
-                    After launching container, press back key -> left side menu, \
-                    click the option "PRoot shell" to show it.
                     - If enabled, starting the container -> press the phone's back button -> click option "PRoot shell" to show the shell dialog.
+                    
                     - When proot is started, this funtion will ask proot to run /usr/bin/dash and connect to the inputs and outputs of this process.
-                    - At the dialog bottom, you can input commands and press enter to send it.
-                    - Since it doesn't send characters every time the key is pressed, it doesn't work properly when editing text, sending shortcut commands, etc.
-                    - Currently Winlator(6.1) by default adds environment variable WINEDEBUG=-all to block all output logs of wine. If you want to see it, please override this environment variable manually in the container settings. \
+                    
+                    - At the dialog bottom, you can input commands and press enter to send it.Since it doesn't send characters every time \
+                    the key is pressed, it doesn't work properly when using text editor, sending shortcut commands, etc.
+                    
+                    - Currently Winlator(6.1) by default adds environment variable WINEDEBUG=-all to block all output logs of wine. \
+                    If you want to see it, please override this environment variable manually in the container settings. \
                     e.g. WINEDEBUG=err+all,fixme+all
+                    
+                    - At the dialog bottom-right, you can turn on the "Auto Scroll To Bottom" option. Note that when this option is turned on, \
+                    users may be interrupted by a new output line while typing commands, please consider turning it off if it happens.
                     """;
         QH.string.proot终端_启动失败_请关闭选项重试 = "Launch failed. Please disable the PRoot shell option in settings and retry.";
         QH.string.proot终端_请先开启选项 = "Unable to get output. Please go back to settings and enable the proot shell option first.";
-
+        QH.string.proot终端_自动滚动到底部 = "Auto Scroll To Bottom";
     }
 }

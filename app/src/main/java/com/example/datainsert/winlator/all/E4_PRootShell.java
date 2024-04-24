@@ -9,7 +9,6 @@ import android.content.Context;
 import android.graphics.Point;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -19,6 +18,7 @@ import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.UiThread;
@@ -52,10 +52,13 @@ public class E4_PRootShell {
     static Handler handler = new Handler(Looper.getMainLooper());
     private static final String PREF_KEY_PROOT_TERMINAL_ENABLE = "proot_terminal_enable";
     private static final String PREF_KEY_PROOT_TERMINAL_TEXT_SIZE = "proot_terminal_text_size";
+    private static final String PREF_KEY_PROOT_TERMINAL_AUTO_SCROLL = "proot_terminal_auto_scroll";
     //获取输出流的线程。进程结束时应置为null
     private static OutputThread outputThread;
     private static Process runningProcess;
     private static int pid = -1;
+    private static boolean isAutoScroll = true; //是否自动滚动到底部
+
 
     /**
      * 主界面 - 设置中 添加选项。
@@ -187,13 +190,17 @@ public class E4_PRootShell {
             }
         });
 
+        DisplayCallback displayCallback;
         //文字输出
         TextView tvOutput = root.findViewById(R.id.terminal_text);
         tvOutput.setTextSize(TypedValue.COMPLEX_UNIT_PX, QH.getPreference(a).getFloat(PREF_KEY_PROOT_TERMINAL_TEXT_SIZE, dp8*7/4f));
         if(outputThread ==null || !outputThread.isAlive()) {
             tvOutput.setText(QH.string.proot终端_请先开启选项);
+            displayCallback = null;
+//            runTestThread((displayCallback = new DisplayCallback(tvOutput)), tvOutput);
         } else {
-            outputThread.setDisplayCallback(new DisplayCallback(tvOutput));
+            displayCallback = new DisplayCallback(tvOutput);
+            outputThread.setDisplayCallback(displayCallback);
         }
 
         //菜单显隐
@@ -206,6 +213,17 @@ public class E4_PRootShell {
 //                    android.os.Process.sendSignal(pid, SIGKILL);
 //                    sendInputToProcess("\003");
 //                    Os.kill(pid, SIGINT);
+
+        //自动滚动到底部
+        isAutoScroll = QH.getPreference(a).getBoolean(PREF_KEY_PROOT_TERMINAL_AUTO_SCROLL, true);
+        root.findViewById(R.id.btn_auto_scroll).setOnClickListener(v -> {
+//            if(displayCallback == null) return;
+//            boolean newValue = !displayCallback.isAutoScroll();
+//            displayCallback.setAutoScroll(newValue);
+            isAutoScroll = !isAutoScroll;
+            QH.getPreference(v.getContext()).edit().putBoolean(PREF_KEY_PROOT_TERMINAL_AUTO_SCROLL, isAutoScroll).apply();
+        });
+        root.findViewById(R.id.btn_auto_scroll).setTooltipText(QH.string.proot终端_自动滚动到底部);
 
         //帮助
         root.findViewById(R.id.btn_help).setOnClickListener(v -> QH
@@ -248,6 +266,20 @@ public class E4_PRootShell {
         QH.getPreference(tv.getContext()).edit().putFloat(PREF_KEY_PROOT_TERMINAL_TEXT_SIZE, limitSize).apply();
     }
 
+    private static void runTestThread(DisplayCallback callback, TextView tvOutput){
+        new Thread(() -> {
+            while (true) {
+                long time = (long) (Math.random() * 200);
+                try {
+                    Thread.sleep(time);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                tvOutput.post(() -> callback.call(""+time));
+            }
+        }).start();
+    }
+
     private static class OutputThread extends Thread{
         private List<String> allLines = new ArrayList<>(); //存储历史文本行
         private DisplayCallback displayCallback = null; //用于将文本显示到屏幕上的回调。其内容应该在主线程上执行
@@ -263,7 +295,6 @@ public class E4_PRootShell {
             displayCallback = callback;
             handler.post(() -> {
                 for(String line : allLines)
-                    //TODO 这里和run里的回调调用，应该加个锁？(算了放到uithread就不用管了吧）
                     displayCallback.call(line);
             });
         }
@@ -319,16 +350,15 @@ public class E4_PRootShell {
 
     private static class DisplayCallback implements Callback<String> {
         TextView tv;
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        boolean autoScrollDown;
-        long lastUpdateTime;
-
         int lineCount = 0;
         int breakPointCount = 0;
         List<Integer> trimBreakPoint = new ArrayList<>();//要删除缓存行时，移除这里的第一个元素，将此idx之前的字符删掉
         public DisplayCallback(TextView tv) {
             this.tv = tv;
-            this.tv.setText(builder);
+
+            //设置BufferType为editable，后续用getEditableText获取和编辑
+            this.tv.setText("", TextView.BufferType.EDITABLE);
+
         }
 
         /**
@@ -338,22 +368,33 @@ public class E4_PRootShell {
         @UiThread
         @Override
         public void call(String line) {
-            builder.append(line).append("\n");
+//            if(!isAutoScroll)
+//                isAutoScroll = tv.getHeight() <= scrollView.getScrollY() + scrollView.getHeight();
+            tv.getEditableText().append(line).append('\n');
+            if(isAutoScroll) {
+                //原来是fullScroll调用后会设置textview为焦点导致的，即使不再手动调用也会自动滚动。同时也会导致edittext输入到一半被清空焦点。。
+                tv.post(() -> {
+                    ((NestedScrollView) tv.getParent().getParent()).fullScroll(FOCUS_DOWN);
+                    tv.clearFocus();
+                });
+            }
+
+//            builder.append(line).append("\n");
             //如果快速输入两行，则第一行输入后，尚未滚动到最底部时，第二行输入，此时不会再滚动到最底部。所以只有当确实滚动后再置为false
             //还是不行啊，加个时间限制吧，限制textview.setText()频率
-            updateTextView();
+//            updateTextView(false);
 
             lineCount ++;
             breakPointCount ++;
             if(breakPointCount > REDUCED_FRAGMENT) {
                 breakPointCount = 0;
-                trimBreakPoint.add(builder.length());
+                trimBreakPoint.add(tv.getEditableText().length());
             }
 
             if(lineCount > MAX_LINE) {
                 lineCount = MAX_LINE - REDUCED_FRAGMENT;
                 int del = trimBreakPoint.remove(0);
-                builder.delete(0, del);
+                tv.getEditableText().delete(0, del);
                 for(int i=0; i<trimBreakPoint.size(); i++) {
                     int old = trimBreakPoint.remove(i);
                     trimBreakPoint.add(i, old - del);
@@ -361,34 +402,39 @@ public class E4_PRootShell {
             }
         }
 
-        /**
-         * 调用此函数更新textview的文字。
-         * <br/> 如果更新文字前视图处于最底部，则添加一行后再次滚动到最底部
-         * <br/> 如果距离上次刷新文字时间小于200秒，跳过此次刷新，延迟一段时间后重试
-         */
-        public void updateTextView () {
-            long currTime = System.currentTimeMillis();
-            NestedScrollView scrollView = (NestedScrollView) tv.getParent().getParent();
-
-            if(!autoScrollDown)
-                autoScrollDown = tv.getHeight() <= scrollView.getScrollY() + scrollView.getHeight();
-
-
-            if(currTime - lastUpdateTime > 200) {
-                lastUpdateTime = currTime;
-                //要重新设置到textview上吗 需要
-                tv.setText(builder);
-
-                //如果当前已经在最底部，添加新一行之后应该继续滚动到最底部。注意要用post
-                if(autoScrollDown)
-                    scrollView.post(() -> {
-                        scrollView.fullScroll(FOCUS_DOWN);
-                        autoScrollDown = false;
-                    });
-            } else {
-                tv.postDelayed(this::updateTextView, 200);
-            }
-        }
+//        /**
+//         * 调用此函数更新textview的文字。
+//         * <br/> 如果更新文字前视图处于最底部，则添加一行后再次滚动到最底部
+//         * <br/> 如果距离上次刷新文字时间小于200秒，跳过此次刷新，延迟一段时间后重试
+//         * @param isFromDelayed 该调用是否为当前频率过快而延迟调用。如果是，检查当前是否还需要刷新
+//         */
+//        public void updateTextView (boolean isFromDelayed) {
+//            //延迟调用，如果已经被之前处理过了，则不管了
+//            if(isFromDelayed && !isTextUnhandled)
+//                return;
+//
+//            long currTime = System.currentTimeMillis();
+//            NestedScrollView scrollView = (NestedScrollView) tv.getParent().getParent();
+//
+//            if(!isAutoScroll)
+//                isAutoScroll = tv.getHeight() <= scrollView.getScrollY() + scrollView.getHeight();
+//
+//            if(currTime - lastUpdateTime > 200) {
+//                isTextUnhandled = false;
+//                lastUpdateTime = currTime;
+//                //要重新设置到textview上吗 需要
+////                tv.setText("Dd", TextView.BufferType.EDITABLE);
+//                //如果当前已经在最底部，添加新一行之后应该继续滚动到最底部。注意要用post
+//                if(isAutoScroll)
+//                    scrollView.post(() -> {
+//                        scrollView.fullScroll(FOCUS_DOWN);
+//                        isAutoScroll = false;
+//                    });
+//            } else {
+////                isTextUnhandled = true;
+////                tv.postDelayed(() -> updateTextView(true), 200);
+//            }
+//        }
     }
 
 }

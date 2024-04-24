@@ -319,6 +319,7 @@ public class QH {
     public static class string{
         public static String proot终端_请先开启选项;
         public static String proot终端_启动失败_请关闭选项重试;
+        public static String proot终端_自动滚动到底部;
         public static String proot终端;
         public static String proot终端说明;
         public static String logcat日志;
