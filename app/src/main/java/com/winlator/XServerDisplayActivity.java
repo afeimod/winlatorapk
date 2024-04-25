@@ -352,8 +352,8 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
     }
 
     private void setupXEnvironment() {
-//        envVars.put("MESA_DEBUG", "silent");
-//        envVars.put("MESA_NO_ERROR", "1");
+        envVars.put("MESA_DEBUG", "silent");
+        envVars.put("MESA_NO_ERROR", "1");
         envVars.put("WINEPREFIX", ImageFs.WINEPREFIX);
         if (MainActivity.DEBUG_LEVEL <= 1) envVars.put("WINEDEBUG", "-all");
 
