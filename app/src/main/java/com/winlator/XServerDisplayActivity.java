@@ -218,16 +218,16 @@ public class XServerDisplayActivity extends AppCompatActivity implements Navigat
         }
     }
 
+    //onResume和onPause改为onStart和onStop，以支持画中画模式，进入pip时不会暂停进程
     @Override
-    public void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
         xServerView.onResume();
         if (environment != null) environment.onResume();
     }
-
     @Override
-    public void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         if (environment != null) environment.onPause();
         xServerView.onPause();
     }
