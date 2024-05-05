@@ -1,6 +1,9 @@
 package com.example.datainsert.winlator.all;
 
+import android.app.PictureInPictureParams;
+import android.util.Rational;
 import android.view.Menu;
+import android.view.SubMenu;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -33,7 +36,15 @@ public class ExtraFeatures {
 
     }
 
+    public static class Rotate extends E5_Orientation {
+
+    }
+
     public static class ClickToMovePointer extends E6_ClickToMovePointer {
+
+    }
+
+    public static class PIP extends E7_PIP {
 
     }
 
@@ -61,16 +72,21 @@ public class ExtraFeatures {
     public static class XMenuExtra {
         public static void addItemsAndInit(XServerDisplayActivity a) {
             //添加选项。顺带初始化
+            SubMenu menu = ((NavigationView) a.findViewById(R.id.NavigationView)).getMenu().addSubMenu(QH.string.额外功能);
 
-            Menu menu = ((NavigationView) a.findViewById(R.id.NavigationView)).getMenu();
             menu.add(QH.string.旋转屏幕选项).setOnMenuItemClickListener(item -> {
                 ((DrawerLayout) a.findViewById(R.id.DrawerLayout)).closeDrawers();
-                return E5_Orientation.onClick(a);
+                return Rotate.onClick(a);
             });
 
             menu.add(QH.string.proot终端).setOnMenuItemClickListener(item -> {
                 ((DrawerLayout) a.findViewById(R.id.DrawerLayout)).closeDrawers();
                 return PRootShell.showTerminalDialog(a);
+            });
+
+            menu.add(QH.string.画中画模式).setOnMenuItemClickListener(item -> {
+                ((DrawerLayout) a.findViewById(R.id.DrawerLayout)).closeDrawers();
+                return PIP.enterPIP(a);
             });
 
             //初次启动设置

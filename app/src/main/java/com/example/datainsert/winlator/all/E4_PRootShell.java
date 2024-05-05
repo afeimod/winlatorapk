@@ -119,7 +119,7 @@ public class E4_PRootShell {
 
             runningProcess = builder.start();
             //反射时，类要用实例.getClass()获取，而不能直接传入抽象类Process
-            pid = QH.reflectGetFieldInt(runningProcess.getClass(), runningProcess, "pid", true);
+            pid = UtilsReflect.getPid(runningProcess);
             Log.d(TAG, "exec: 获取到的pid="+pid);
 
             //获取输出流

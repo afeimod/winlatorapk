@@ -27,10 +27,10 @@ public class E5_Orientation {
         a.setRequestedOrientation(isLandSc
                 ? SCREEN_ORIENTATION_SENSOR_LANDSCAPE
                 : SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-        //还是暴力延迟500ms然后切换两次全屏吧。反射修改viewportNeedsUpdate在初次启动时貌似没效果
-        GLRenderer renderer = a.getXServer().getRenderer();
-        renderer.xServerView.postDelayed(renderer::toggleFullscreen,500);
-        renderer.xServerView.postDelayed(renderer::toggleFullscreen,800);
+//        //还是暴力延迟500ms然后切换两次全屏吧。反射修改viewportNeedsUpdate在初次启动时貌似没效果
+//        GLRenderer renderer = a.getXServer().getRenderer();
+//        renderer.xServerView.postDelayed(renderer::toggleFullscreen,500);
+//        renderer.xServerView.postDelayed(renderer::toggleFullscreen,800);
     }
 
     public static boolean getIsOrieLandFromPref(Context a) {
