@@ -41,10 +41,12 @@
             </intent-filter>
         </activity>
 
+        <!--        添加画中画支持-->
         <activity android:name="com.winlator.XServerDisplayActivity"
             android:exported="false"
             android:theme="@style/AppThemeFullscreen"
             android:launchMode="singleTask"
+            android:supportsPictureInPicture="true"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|density|navigation"
             android:screenOrientation="sensorLandscape" />
 
