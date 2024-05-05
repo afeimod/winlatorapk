@@ -94,6 +94,10 @@ public class GLRenderer implements GLSurfaceView.Renderer, WindowManager.OnWindo
         surfaceWidth = width;
         surfaceHeight = height;
         viewport.update(width, height, xServer.screenInfo.width, xServer.screenInfo.height);
+
+        //视图宽高改变时，应该重新设置viewport
+        viewportNeedsUpdate = true;
+        xServerView.requestRender();
     }
 
     @Override
