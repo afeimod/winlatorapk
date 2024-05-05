@@ -49,5 +49,6 @@ public class StringZh {
         QH.string.proot终端_启动失败_请关闭选项重试 = "启动失败。请关闭设置中的“PRoot终端”选项再重试。";
         QH.string.proot终端_请先开启选项 = "无法获取输出。请退回到主界面，左上角进入设置，开启PRoot终端选项。";
         QH.string.proot终端_自动滚动到底部 = "自动滚动到底部";
+        QH.string.画中画模式 = "画中画模式";
     }
 }

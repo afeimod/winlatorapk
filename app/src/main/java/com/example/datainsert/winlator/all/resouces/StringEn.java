@@ -53,5 +53,6 @@ public class StringEn {
         QH.string.proot终端_启动失败_请关闭选项重试 = "Launch failed. Please disable the PRoot shell option in settings and retry.";
         QH.string.proot终端_请先开启选项 = "Unable to get output. Please go back to settings and enable the proot shell option first.";
         QH.string.proot终端_自动滚动到底部 = "Auto Scroll To Bottom";
+        QH.string.画中画模式 = "PIP Mode";
     }
 }
