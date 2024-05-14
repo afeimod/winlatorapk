@@ -216,6 +216,7 @@ public class ControlsProfile implements Comparable<ControlsProfile> {
                 element.setIconId(elementJSONObject.getInt("iconId"));
                 if (elementJSONObject.has("range")) element.setRange(ControlElement.Range.valueOf(elementJSONObject.getString("range")));
                 if (elementJSONObject.has("orientation")) element.setOrientation((byte)elementJSONObject.getInt("orientation"));
+                if(elementJSONObject.has("vibrate"))  element.vibrate = elementJSONObject.getBoolean("vibrate"); //震动
 
                 boolean hasGamepadBinding = true;
                 JSONArray bindingsJSONArray = elementJSONObject.getJSONArray("bindings");

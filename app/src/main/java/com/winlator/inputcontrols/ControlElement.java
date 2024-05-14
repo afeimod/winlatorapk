@@ -12,6 +12,7 @@ import android.util.Log;
 
 import androidx.core.graphics.ColorUtils;
 
+import com.example.datainsert.winlator.all.ExtraFeatures;
 import com.winlator.math.Mathf;
 import com.winlator.widget.InputControlsView;
 
@@ -78,6 +79,7 @@ public class ControlElement {
     private Range range;
     private byte orientation;
     private PointF thumbstickPosition;
+    public boolean vibrate = false; //震动
     //range button. handler for scrolling or key pressing
     private class RangeDelayTimer extends CountDownTimer{
         private static final String TAG = "RangeDelayTimer";
@@ -615,6 +617,7 @@ public class ControlElement {
             elementJSONObject.put("toggleSwitch", toggleSwitch);
             elementJSONObject.put("text", text);
             elementJSONObject.put("iconId", iconId);
+            elementJSONObject.put("vibrate", vibrate); //震动
 
             if (type == Type.RANGE_BUTTON && range != null) {
                 elementJSONObject.put("range", range.name());
@@ -636,6 +639,7 @@ public class ControlElement {
             currentPointerId = pointerId;
             if (type == ControlElement.Type.BUTTON) {
                 if (!toggleSwitch || !selected) inputControlsView.handleInputEvent(getBindingAt(0), true);
+                if(vibrate) ExtraFeatures.Vibrate.on(inputControlsView.getContext());
                 return true;
             }
             else if (type == Type.RANGE_BUTTON) {
