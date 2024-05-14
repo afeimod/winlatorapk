@@ -19,8 +19,10 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <!--    震动-->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
-<!--    自定义application以全局捕捉异常-->
+    <!--    自定义application以全局捕捉异常-->
     <application
         android:name="com.example.datainsert.winlator.all.ExtraFeatures$MyApplication"
         android:icon="@mipmap/ic_launcher"
