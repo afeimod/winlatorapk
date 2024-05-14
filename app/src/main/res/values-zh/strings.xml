@@ -238,6 +238,6 @@
     <string name="add_to_screen">添加到安卓桌面</string>
     <string name="screen_shortcut_file_not_exist">快捷方式不存在！</string>
     <string name="screen_shortcut_add_finish">添加成功。请在安卓桌面长按应用图标查看。</string>
-
+    <string name="vibrate_when_press">按下时振动</string>
 
 </resources>
