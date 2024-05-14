@@ -60,6 +60,8 @@ class E3_Logcat {
                     return;
 
                 //启动logcat
+                if(outputFile.length() > 1024*1024*8) //超过8M的话就清理
+                    outputFile.delete();
                 String cmd = "logcat" +
                         " -f " + outputFile.getAbsolutePath() +
 //                        " -r 500" + //500kb换一个文件
