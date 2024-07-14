@@ -5,33 +5,26 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-<!--    原先Spinner宽度写死了。现在让其weight=1，然后外面加个相对布局把宽度撑满-->
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp"
-            android:gravity="center_vertical">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp"
+        android:gravity="center_vertical">
 
-            <Spinner
-                style="@style/ComboBox"
-                android:id="@+id/SProfile"
-                android:layout_width="0dp"
-                android:layout_weight="1"/>
+        <Spinner
+            style="@style/ComboBox"
+            android:id="@+id/SProfile"
+            android:layout_width="330dp" />
 
-            <ImageView
-                android:id="@+id/BTSettings"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_marginLeft="8dp"
-                app:tint="@color/colorPrimary"
-                android:src="@drawable/icon_settings" />
-        </LinearLayout>
-    </RelativeLayout>
-
+        <ImageView
+            android:id="@+id/BTSettings"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginLeft="8dp"
+            app:tint="@color/colorPrimary"
+            android:src="@drawable/icon_settings" />
+    </LinearLayout>
 
     <CheckBox
         android:id="@+id/CBShowTouchscreenControls"
@@ -41,8 +34,8 @@
         android:text="@string/show_touchscreen_controls" />
 
     <CheckBox
-        android:id="@+id/CBLockCursor"
+        android:id="@+id/CBRelativeMouseMovement"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/lock_cursor" />
+        android:text="@string/relative_mouse_movement" />
 </LinearLayout>
